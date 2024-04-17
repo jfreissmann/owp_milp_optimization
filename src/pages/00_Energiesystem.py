@@ -4,7 +4,7 @@ import darkdetect
 import streamlit as st
 
 is_dark = darkdetect.isDark()
-logo = os.path.join(__file__, '..', '..', 'img', 'Logo_ZNES_mitUnisV2.svg')
+topopath = os.path.join(__file__, '..', '..', 'img', 'es_topology_')
 
 tab1, tab2, tab3, tab4 = st.tabs(
     ['System', 'Anlagen','Wärmelast', 'Energiepreise']
@@ -20,9 +20,9 @@ with tab1:
         )
     print(units)
 
+    st.image(f'{topopath}header.svg')
     for i in units:
-        st.image(logo)
-        st.write(i)
+        st.image(f'{topopath+i}.svg')
 
 with tab2:
     st.write('Hier die ausgewählten Anlagen parametrisieren')
