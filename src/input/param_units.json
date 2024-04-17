@@ -1,13 +1,19 @@
 {
     "hp": {
+        "Q_rel_max": 1.0,
+        "Q_rel_min": 0.3,
+        "cop": 3.0,
         "op_cost_var": 1.20,
         "op_cost_fix": 4000.00,
         "inv_spez": 500000.00,
         "cap_max": 50,
-        "cap_min": 0,
-        "amount": 7
+        "cap_min": 0
     },
     "ccet": {
+        "Q_rel_max": 1.0,
+        "Q_rel_min": 0.15,
+        "eta_th": 0.5,
+        "eta_el": 0.35,
         "op_cost_var": 4.40,
         "op_cost_fix": 29300.00,
         "inv_spez": 880000.00,
@@ -25,6 +31,10 @@
         "cap_min": 0
     },
     "ice": {
+        "Q_rel_max": 1.0,
+        "Q_rel_min": 0.15,
+        "eta_th": 0.45,
+        "eta_el": 0.30,
         "op_cost_var": 7.50,
         "op_cost_fix": 9750.00,
         "inv_spez": 950000.00,
@@ -32,13 +42,12 @@
         "cap_min": 0
     },
     "sol": {
+        "eta_col": 0.3,
         "op_cost_var": 0.21,
         "op_cost_fix": 0.09,
         "inv_spez": null,
         "cap_max": 150000,
-        "cap_min": 0,
-        "BEW_inv": null,
-        "BEW_op": 10
+        "cap_min": 0
     },
     "tes": {
         "inv_spez": null,
