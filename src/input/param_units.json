@@ -1,0 +1,55 @@
+{
+    "hp": {
+        "op_cost_var": 1.20,
+        "op_cost_fix": 4000.00,
+        "inv_spez": 500000.00,
+        "cap_max": 50,
+        "cap_min": 0,
+        "amount": 7
+    },
+    "ccet": {
+        "op_cost_var": 4.40,
+        "op_cost_fix": 29300.00,
+        "inv_spez": 880000.00,
+        "cap_max": 353,
+        "cap_min": 0
+    },
+    "plb": {
+        "Q_rel_max": 1.0,
+        "Q_rel_min": 0.15,
+        "eta": 0.95,
+        "op_cost_var": 1.10,
+        "op_cost_fix": 1950.00,
+        "inv_spez": 60000.00,
+        "cap_max": 353,
+        "cap_min": 0
+    },
+    "ice": {
+        "op_cost_var": 7.50,
+        "op_cost_fix": 9750.00,
+        "inv_spez": 950000.00,
+        "cap_max": 353,
+        "cap_min": 0
+    },
+    "sol": {
+        "op_cost_var": 0.21,
+        "op_cost_fix": 0.09,
+        "inv_spez": null,
+        "cap_max": 150000,
+        "cap_min": 0,
+        "BEW_inv": null,
+        "BEW_op": 10
+    },
+    "tes": {
+        "inv_spez": null,
+        "cap_max": 8472,
+        "cap_min": 0,
+        "Q_in_to_cap": 0.041666667,
+        "Q_out_to_cap": 0.041666667,
+        "Q_rel_loss": 5e-05,
+        "op_cost_var": 0.01,
+        "op_cost_fix": 3.0,
+        "balanced": true,
+        "init_storage": 0
+    }
+}

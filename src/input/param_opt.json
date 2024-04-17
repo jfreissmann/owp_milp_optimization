@@ -1,0 +1,16 @@
+{
+    "mipgap": 0.02,
+    "ef_gas": 0.2012,
+    "elec_consumer_charges_grid": 52.52,
+    "elec_consumer_charges_self": 20.50,
+    "heat_price": 76.74,
+    "energy_tax": 5.50,
+    "chp_bonus": 34.00,
+    "h_max_chp_bonus": 1500,
+    "TEHG_bonus": 3.0,
+    "vNNE": 7.0,
+    "use_BEW_op_bonus": true,
+    "BEW": 0.4,
+    "capital_interest": 0.05,
+    "lifetime": 20
+}
