@@ -27,6 +27,18 @@ unitpath = os.path.join(__file__, '..', '..', 'input', 'param_units.json')
 with open(unitpath, 'r', encoding='utf-8') as file:
     ss.param_units = json.load(file)
 
+# %% Sidebar
+with st.sidebar:
+    if is_dark:
+        logo = os.path.join(
+            __file__, '..', '..', 'img', 'Logo_ZNES_mitUnisV2_dark.svg'
+            )
+    else:
+        logo = os.path.join(
+            __file__, '..', '..', 'img', 'Logo_ZNES_mitUnisV2.svg'
+            )
+    st.image(logo, use_column_width=True)
+
 tab1, tab2, tab3, tab4 = st.tabs(
     ['System', 'Anlagen','Wärmelast', 'Energiepreise']
     )
