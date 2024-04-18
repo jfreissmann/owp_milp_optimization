@@ -55,12 +55,16 @@ with tab1:
         list(shortnames.keys()),
         placeholder='Wärmeversorgungsanlagen'
         )
-    topopath = os.path.join(__file__, '..', '..', 'img', 'es_topology_')
 
+    col_topo, _ = st.columns([1, 2])
+
+    topopath = os.path.join(__file__, '..', '..', 'img', 'es_topology_')
     if units:
-        st.image(f'{topopath}header.png', width=700)
+        col_topo.image(f'{topopath}header.png', use_column_width=True)
         for unit in units:
-            st.image(f'{topopath+shortnames[unit]}.png', width=700)
+            col_topo.image(
+                f'{topopath+shortnames[unit]}.png', use_column_width=True
+                )
 
 with tab2:
     st.header('Parametrisierung der Wärmeversorgungsanlagen')
