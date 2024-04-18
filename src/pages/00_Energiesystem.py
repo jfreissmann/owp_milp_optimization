@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import date
 
 import darkdetect
 import streamlit as st
@@ -47,10 +48,10 @@ tab1, tab2, tab3, tab4 = st.tabs(
     )
 
 with tab1:
-    st.header('Wärmeversorgungssystem')
+    st.header('Auswahl des Wärmeversorgungssystem')
 
     units = st.multiselect(
-        'Wähle die Wärmeversorgungsanlagen aus, die im System verwendet werden können:',
+        'Wähle die Wärmeversorgungsanlagen aus, die im System verwendet werden können',
         list(shortnames.keys()),
         placeholder='Wärmeversorgungsanlagen'
         )
@@ -62,7 +63,7 @@ with tab1:
             st.image(f'{topopath+shortnames[unit]}.png', width=700)
 
 with tab2:
-    st.write('Hier die ausgewählten Anlagen parametrisieren')
+    st.header('Parametrisierung der Wärmeversorgungsanlagen')
 
     for unit in units:
         params = ss.param_units[shortnames[unit]]
@@ -114,9 +115,55 @@ with tab2:
                             key=f'input_{shortnames[unit]}_{uinput}'
                             )
                         )
-    
+
 with tab3:
-    st.write('Hier die Wärmelast und den Zeitraum auswählen')
+    st.header('Auswahl der Wärmelastdatem')
+
+    col_sel, col_vis = st.columns([1, 2])
+
+    dataset_name = col_sel.selectbox(
+        'Wähle die Wärmelastdaten aus, die im System zu verwenden sind',
+        ['Flensburg', 'Sønderborg', 'Eigene Daten'],
+        placeholder='Wärmelastendaten'
+    )
+
+    if dataset_name == 'Eigene Daten':
+        headload_year = None
+        user_file = st.file_uploader('Datensatz einlesen', type='xlsx')
+        if user_file is None:
+            st.info(
+                'Bitte fügen Sie eine Datei ein.'
+                )
+    elif dataset_name == 'Flensburg':
+        headload_year = col_sel.selectbox(
+            'Wähle das Jahr der Wärmelastdaten aus',
+            ['2014', '2015', '2016', '2017', '2018', '2019'],
+            placeholder='Betrachtungsjahr'
+        )
+    elif dataset_name == 'Sønderborg':
+        headload_year = col_sel.selectbox(
+            'Wähle das Jahr der Wärmelastdaten aus',
+            ['2017', '2018', '2019'],
+            placeholder='Betrachtungsjahr'
+        )
+
+    if headload_year:
+        precise_dates = col_sel.toggle(
+            'Exakten Zeitraum wählen'
+        )
+        if precise_dates:
+            dates = col_sel.date_input(
+                'Zeitraum auswählen:',
+                value=(
+                    date(int(headload_year), 3, 28),
+                    date(int(headload_year), 7, 2)
+                    ),
+                min_value=date(int(headload_year), 1, 1),
+                max_value=date(int(headload_year), 12, 31),
+                format='DD.MM.YYYY'
+                )
+
+    col_vis.write('Placeholder for Heatloadplot')
 
 with tab4:
     st.write('Hier alle Energiepreise aufzuzeigen')
