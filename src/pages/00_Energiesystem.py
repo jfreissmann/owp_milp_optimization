@@ -53,18 +53,20 @@ with tab1:
         )
     topopath = os.path.join(__file__, '..', '..', 'img', 'es_topology_')
 
-    st.image(f'{topopath}header.png', width=500)
-    for unit in units:
-        st.image(f'{topopath+shortnames[unit]}.png', width=500)
+    if units:
+        st.image(f'{topopath}header.png', width=700)
+        for unit in units:
+            st.image(f'{topopath+shortnames[unit]}.png', width=700)
 
 with tab2:
     st.write('Hier die ausgewählten Anlagen parametrisieren')
 
-    for unit, params in ss.param_units.items():
-        with st.expander(longnames[unit]):
+    for unit in units:
+        params = ss.param_units[shortnames[unit]]
+        with st.expander(unit):
             for param, value in params.items():
-                ss.param_units[unit][param] = st.number_input(
-                    param, value=value, key=f'input_{unit}_{param}'
+                ss.param_units[shortnames[unit]][param] = st.number_input(
+                    param, value=value, key=f'input_{shortnames[unit]}_{param}'
                 )
 
 with tab3:
