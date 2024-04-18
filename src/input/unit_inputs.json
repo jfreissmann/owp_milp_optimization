@@ -1,18 +1,46 @@
 {
     "Technische Parameter": {
         "cap_max": {
-            "name": "Maximale Kapazität",
+            "name": "Maximal installierbare Leistung",
             "min": 0.0,
             "max": 1000.0,
             "type": "float",
             "unit": "MW"
         },
         "cap_min": {
-            "name": "Minimale Kapazität",
+            "name": "Minimal installierbare Leistung",
             "min": 0.0,
             "max": 1000.0,
             "type": "float",
             "unit": "MW"
+        },
+        "A_max": {
+            "name": "Maximal installierbare Kollektorfläche",
+            "min": 0.0,
+            "max": 1000000.0,
+            "type": "float",
+            "unit": "m²"
+        },
+        "A_min": {
+            "name": "Minimal installierbare Kollektorfläche",
+            "min": 0.0,
+            "max": 1000000.0,
+            "type": "float",
+            "unit": "m²"
+        },
+        "Q_max": {
+            "name": "Maximal installierbare Speicherkapazität",
+            "min": 0.0,
+            "max": 1000000.0,
+            "type": "float",
+            "unit": "MWh"
+        },
+        "Q_min": {
+            "name": "Minimal installierbare Speicherkapazität",
+            "min": 0.0,
+            "max": 1000000.0,
+            "type": "float",
+            "unit": "MWh"
         },
         "eta": {
             "name": "Wirkungsgrad",
@@ -70,17 +98,17 @@
             "type": "float",
             "unit": ""
         },
-        "balanced": {
-            "name": "Ausgeglichener Speicher über Betrachtungsperiode",
-            "type": "bool",
-            "unit": ""
-        },
         "init_storage": {
             "name": "Initialspeicherstand",
             "min": 0.0,
             "max": 100.0,
             "type": "float",
             "unit": "%"
+        },
+        "balanced": {
+            "name": "Ausgeglichener Speicher über Betrachtungsperiode",
+            "type": "bool",
+            "unit": ""
         }
     },
     "Ökonomische Parameter": {

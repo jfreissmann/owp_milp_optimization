@@ -26,6 +26,9 @@ longnames = {
 unitpath = os.path.join(__file__, '..', '..', 'input', 'param_units.json')
 with open(unitpath, 'r', encoding='utf-8') as file:
     ss.param_units = json.load(file)
+unitinputpath = os.path.join(__file__, '..', '..', 'input', 'unit_inputs.json')
+with open(unitinputpath, 'r', encoding='utf-8') as file:
+    ss.unit_inputs = json.load(file)
 
 # %% Sidebar
 with st.sidebar:
@@ -64,11 +67,54 @@ with tab2:
     for unit in units:
         params = ss.param_units[shortnames[unit]]
         with st.expander(unit):
-            for param, value in params.items():
-                ss.param_units[shortnames[unit]][param] = st.number_input(
-                    param, value=value, key=f'input_{shortnames[unit]}_{param}'
-                )
+            col_tech, col_econ = st.columns(2, gap='large')
 
+            col_tech.subheader('Technische Parameter')
+            for uinput, uinfo in ss.unit_inputs['Technische Parameter'].items():
+                if uinput in ss.param_units[shortnames[unit]]:
+                    if uinput == 'balanced':
+                        ss.param_units[shortnames[unit]][uinput] = col_tech.toggle(
+                            uinfo['name'],
+                            value=ss.param_units[shortnames[unit]][uinput]
+                        )
+                    else:
+                        if uinfo['unit'] == '%':
+                            ss.param_units[shortnames[unit]][uinput] *= 100
+                        if uinfo['unit'] == '':
+                            label = uinfo['name']
+                        else:
+                            label = f"{uinfo['name']} in {uinfo['unit']}"
+                        ss.param_units[shortnames[unit]][uinput] = (
+                            col_tech.number_input(
+                                label,
+                                value=float(
+                                    ss.param_units[shortnames[unit]][uinput]
+                                    ),
+                                min_value=uinfo['min'],
+                                max_value=uinfo['max'],
+                                step=(uinfo['max']-uinfo['min'])/100,
+                                key=f'input_{shortnames[unit]}_{uinput}'
+                                )
+                            )
+                        if uinfo['unit'] == '%':
+                            ss.param_units[shortnames[unit]][uinput] /= 100
+
+            col_econ.subheader('Ökonomische Parameter')
+            for uinput, uinfo in ss.unit_inputs['Ökonomische Parameter'].items():
+                if uinput in ss.param_units[shortnames[unit]]:
+                    ss.param_units[shortnames[unit]][uinput] = (
+                        col_econ.number_input(
+                            f"{uinfo['name']} in {uinfo['unit']}",
+                            value=float(
+                                ss.param_units[shortnames[unit]][uinput]
+                                ),
+                            min_value=uinfo['min'],
+                            max_value=uinfo['max'],
+                            step=(uinfo['max']-uinfo['min'])/100,
+                            key=f'input_{shortnames[unit]}_{uinput}'
+                            )
+                        )
+    
 with tab3:
     st.write('Hier die Wärmelast und den Zeitraum auswählen')
 

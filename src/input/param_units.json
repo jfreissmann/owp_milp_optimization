@@ -45,14 +45,14 @@
         "eta_col": 0.3,
         "op_cost_var": 0.21,
         "op_cost_fix": 0.09,
-        "inv_spez": null,
-        "cap_max": 150000,
-        "cap_min": 0
+        "inv_spez": 9999,
+        "A_max": 150000,
+        "A_min": 0
     },
     "tes": {
-        "inv_spez": null,
-        "cap_max": 8472,
-        "cap_min": 0,
+        "inv_spez": 9999,
+        "Q_max": 8472,
+        "Q_min": 0,
         "Q_in_to_cap": 0.041666667,
         "Q_out_to_cap": 0.041666667,
         "Q_rel_loss": 5e-05,
