@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import date
+from datetime import date, datetime, time, timedelta
 
 import darkdetect
 import pandas as pd
@@ -122,22 +122,22 @@ with tab2:
                         )
 
 with tab3:
-    st.header('Auswahl der Wärmelastdatem')
+    st.header('Auswahl der Wärmelastdaten')
 
     col_sel, col_vis = st.columns([1, 2])
 
     dataset_name = col_sel.selectbox(
         'Wähle die Wärmelastdaten aus, die im System zu verwenden sind',
-        ['Flensburg', 'Sønderborg', 'Eigene Daten'],
+        ['Flensburg', 'Sonderburg', 'Eigene Daten'],
         placeholder='Wärmelastendaten'
     )
 
     if dataset_name == 'Eigene Daten':
         heat_load_year = None
         tooltip = (
-            'Die erste Spalte muss ein Datumsindex und die zweite die Wärmelast'
-            + 'in MWh beinhalten. Zusätzlich muss bei csv-Datein das'
-            + 'Trennzeichen ein Semikolon sein.'
+            'Die erste Spalte muss ein Datumsindex in stündlicher Auflösung und'
+            + ' die zweite die Wärmelast in MWh beinhalten. Zusätzlich muss bei'
+            + 'der csv-Datein das Trennzeichen ein Semikolon sein.'
             )
         user_file = col_sel.file_uploader(
             'Datensatz einlesen', type=['csv', 'xlsx'], help=tooltip
@@ -160,7 +160,7 @@ with tab3:
             ['2014', '2015', '2016', '2017', '2018', '2019'],
             placeholder='Betrachtungsjahr'
         )
-    elif dataset_name == 'Sønderborg':
+    elif dataset_name == 'Sonderburg':
         heat_load_year = col_sel.selectbox(
             'Wähle das Jahr der Wärmelastdaten aus',
             ['2016', '2017', '2018', '2019'],
@@ -189,9 +189,14 @@ with tab3:
                 max_value=date(int(heat_load_year), 12, 31),
                 format='DD.MM.YYYY'
                 )
+            dates = [
+                datetime(year=d.year, month=d.month, day=d.day) for d in dates
+                ]
+            heat_load = heat_load.loc[dates[0]:dates[1], :]
 
+    heat_load.rename(columns={heat_load.columns[0]: 'heat_load'}, inplace=True)
     col_vis.line_chart(
-        heat_load, x='Datum', y='Wärmelast in MWh', color='#EC6707',
+        heat_load['heat_load'], color='#EC6707',
         use_container_width=True
     )
 
