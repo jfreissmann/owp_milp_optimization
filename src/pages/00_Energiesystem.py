@@ -3,6 +3,7 @@ import os
 from datetime import date
 
 import darkdetect
+import pandas as pd
 import streamlit as st
 from streamlit import session_state as ss
 
@@ -132,26 +133,48 @@ with tab3:
     )
 
     if dataset_name == 'Eigene Daten':
-        headload_year = None
-        user_file = st.file_uploader('Datensatz einlesen', type='xlsx')
+        heat_load_year = None
+        tooltip = (
+            'Die erste Spalte muss ein Datumsindex und die zweite die Wärmelast'
+            + 'in MWh beinhalten. Zusätzlich muss bei csv-Datein das'
+            + 'Trennzeichen ein Semikolon sein.'
+            )
+        user_file = col_sel.file_uploader(
+            'Datensatz einlesen', type=['csv', 'xlsx'], help=tooltip
+            )
         if user_file is None:
-            st.info(
+            col_sel.info(
                 'Bitte fügen Sie eine Datei ein.'
                 )
+        else:
+            if user_file.lower().endswith('csv'):
+                heat_load = pd.read_csv(
+                    user_file, sep=';', index_col=0, parse_dates=True
+                    )
+            elif user_file.lower().endswith('xlsx'):
+                heat_load = pd.read_excel(user_file, index_col=0)
+
     elif dataset_name == 'Flensburg':
-        headload_year = col_sel.selectbox(
+        heat_load_year = col_sel.selectbox(
             'Wähle das Jahr der Wärmelastdaten aus',
             ['2014', '2015', '2016', '2017', '2018', '2019'],
             placeholder='Betrachtungsjahr'
         )
     elif dataset_name == 'Sønderborg':
-        headload_year = col_sel.selectbox(
+        heat_load_year = col_sel.selectbox(
             'Wähle das Jahr der Wärmelastdaten aus',
-            ['2017', '2018', '2019'],
+            ['2016', '2017', '2018', '2019'],
             placeholder='Betrachtungsjahr'
         )
+    heat_load_path = os.path.join(
+        __file__, '..', '..', 'input', 'heat_load',
+        f'heat_load_{dataset_name}_{heat_load_year}.csv'
+    )
+    heat_load = pd.read_csv(
+        heat_load_path, sep=';', index_col=0, parse_dates=True
+        )
 
-    if headload_year:
+    if heat_load_year:
         precise_dates = col_sel.toggle(
             'Exakten Zeitraum wählen'
         )
@@ -159,15 +182,18 @@ with tab3:
             dates = col_sel.date_input(
                 'Zeitraum auswählen:',
                 value=(
-                    date(int(headload_year), 3, 28),
-                    date(int(headload_year), 7, 2)
+                    date(int(heat_load_year), 3, 28),
+                    date(int(heat_load_year), 7, 2)
                     ),
-                min_value=date(int(headload_year), 1, 1),
-                max_value=date(int(headload_year), 12, 31),
+                min_value=date(int(heat_load_year), 1, 1),
+                max_value=date(int(heat_load_year), 12, 31),
                 format='DD.MM.YYYY'
                 )
 
-    col_vis.write('Placeholder for Heatloadplot')
+    col_vis.line_chart(
+        heat_load, x='Datum', y='Wärmelast in MWh', color='#EC6707',
+        use_container_width=True
+    )
 
 with tab4:
-    st.write('Hier alle Energiepreise aufzuzeigen')
+    st.header('Auswahl der Preiszeitreihen')
