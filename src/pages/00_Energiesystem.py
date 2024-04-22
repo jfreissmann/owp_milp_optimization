@@ -123,9 +123,9 @@ with tab2:
                         )
 
 with tab3:
-    st.header('Auswahl der Wärmeversorgungsdaten')
+    st.header('Wärmeversorgungsdaten')
 
-    st.subheader('Auswahl der Wärmelastdaten')
+    st.subheader('Wärmelastdaten')
     col_sel, col_vis = st.columns([1, 2])
 
     dataset_name = col_sel.selectbox(
@@ -202,10 +202,13 @@ with tab3:
         use_container_width=True
     )
 
-    st.subheader('Auswahl der Wärmeerlöse')
+    st.subheader('Wärmeerlöse')
+
+    heat_revenue = 80.00
+    st.number_input('Wärmeerlös in €/MWh', value=heat_revenue, key='heat_revenue')
 
 with tab4:
-    st.header('Auswahl der Elektrizitätsversorgungsdaten')
+    st.header('Elektrizitätsversorgungsdaten')
 
 with tab5:
-    st.header('Auswahl der Gasversorgungsdaten')
+    st.header('Gasversorgungsdaten')
