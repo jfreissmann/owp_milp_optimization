@@ -44,15 +44,16 @@ with st.sidebar:
             )
     st.image(logo, use_column_width=True)
 
-tab1, tab2, tab3, tab4 = st.tabs(
-    ['System', 'Anlagen','Wärmelast', 'Energiepreise']
+tab1, tab2, tab3, tab4, tab5 = st.tabs(
+    ['System', 'Anlagen', 'Wärme', 'Elektrizität', 'Gas']
     )
 
 with tab1:
     st.header('Auswahl des Wärmeversorgungssystem')
 
     units = st.multiselect(
-        'Wähle die Wärmeversorgungsanlagen aus, die im System verwendet werden können',
+        'Wähle die Wärmeversorgungsanlagen aus, die im System verwendet werden '
+        + 'können.',
         list(shortnames.keys()),
         placeholder='Wärmeversorgungsanlagen'
         )
@@ -122,8 +123,9 @@ with tab2:
                         )
 
 with tab3:
-    st.header('Auswahl der Wärmelastdaten')
+    st.header('Auswahl der Wärmeversorgungsdaten')
 
+    st.subheader('Auswahl der Wärmelastdaten')
     col_sel, col_vis = st.columns([1, 2])
 
     dataset_name = col_sel.selectbox(
@@ -200,5 +202,10 @@ with tab3:
         use_container_width=True
     )
 
+    st.subheader('Auswahl der Wärmeerlöse')
+
 with tab4:
-    st.header('Auswahl der Preiszeitreihen')
+    st.header('Auswahl der Elektrizitätsversorgungsdaten')
+
+with tab5:
+    st.header('Auswahl der Gasversorgungsdaten')
