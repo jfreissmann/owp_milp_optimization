@@ -209,6 +209,32 @@ with tab3:
 
 with tab4:
     st.header('Elektrizitätsversorgungsdaten')
+    st.info(
+        'Das Start- und Enddatum der Strompreiszeitreihe entsprechen denen der '
+        + 'zuvor ausgewählten Wäremlast. Beim Ändern der Strommarktpreise muss '
+        + 'das Start- und Enddatum sowie die Zeitschritte mit denen der '
+        + 'Wärmelast identisch sein.'
+    )
+    
+    col_elp, col_vis_el = st.columns([1, 2])
 
+    col_elp.subheader('Strompreisbestandteile')
+    # csv einlesen
+    # for schleife wie bei Anlagenparameter
+
+    col_vis_el.subheader('Strommarktpreise')
+    # data_path = os.path.join(
+    #     __file__, '..', '..', 'input', 'heat_load',
+    #     f'heat_load_{dataset_name}_{heat_load_year}.csv'
+    #     )
+    # data = pd.read_csv(data_path, sep=';', index_col=0, parse_dates=True)
+    # data = data.loc[dates[0]:dates[1], :]
+
+    # col_vis_el.line_chart(
+    #     data['spotmarket'], color='#EC6707',use_container_width=True
+    # )
+    spotmarket_data = col_vis_el.toggle('Spotmarktdaten anpassen')
+
+    col_vis_el.subheader('Emissionsfaktoren')
 with tab5:
     st.header('Gasversorgungsdaten')
