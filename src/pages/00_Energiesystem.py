@@ -6,6 +6,7 @@ import darkdetect
 import pandas as pd
 import streamlit as st
 from streamlit import session_state as ss
+import altair as alt
 
 is_dark = darkdetect.isDark()
 shortnames = {
@@ -197,8 +198,14 @@ with tab3:
             heat_load = heat_load.loc[dates[0]:dates[1], :]
 
     heat_load.rename(columns={heat_load.columns[0]: 'heat_load'}, inplace=True)
-    col_vis.line_chart(
-        heat_load['heat_load'], color='#EC6707',
+    heat_load.index.names = ['Date']
+    heat_load.reset_index(inplace=True)
+    print(heat_load)
+    col_vis.altair_chart(
+        alt.Chart(heat_load).mark_line(color='#EC6707').encode(
+            y=alt.Y('heat_load', title='Stündliche Wärmelast in MWh'),
+            x=alt.X('Date', title='Datum')
+        ),
         use_container_width=True
     )
 
