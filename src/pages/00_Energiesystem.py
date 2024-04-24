@@ -2,12 +2,24 @@ import json
 import os
 from datetime import date, datetime, time, timedelta
 
+import altair as alt
 import darkdetect
 import pandas as pd
 import streamlit as st
 from streamlit import session_state as ss
-import altair as alt
 
+
+@st.cache_data
+def read_input_data():
+    """Read in input data all at once."""
+    ahlpath = os.path.abspath(os.path.join(
+        os.path.dirname(__file__), '..', 'input', 'heat_load.csv'
+        ))
+    ss.all_heat_load = pd.read_csv(
+        ahlpath, sep=';', index_col=0, parse_dates=True
+        )
+
+# %% MARK: Parameters
 is_dark = darkdetect.isDark()
 shortnames = {
     'Wärmepumpe': 'hp',
@@ -26,6 +38,8 @@ longnames = {
     'tes': 'Wärmespeicher'
 }
 
+read_input_data()
+
 unitpath = os.path.join(__file__, '..', '..', 'input', 'param_units.json')
 with open(unitpath, 'r', encoding='utf-8') as file:
     ss.param_units = json.load(file)
@@ -33,7 +47,7 @@ unitinputpath = os.path.join(__file__, '..', '..', 'input', 'unit_inputs.json')
 with open(unitinputpath, 'r', encoding='utf-8') as file:
     ss.unit_inputs = json.load(file)
 
-# %% Sidebar
+# %% MARK: Sidebar
 with st.sidebar:
     if is_dark:
         logo = os.path.join(
@@ -49,6 +63,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(
     ['System', 'Anlagen', 'Wärme', 'Elektrizität', 'Gas']
     )
 
+# %% MARK: Energy System
 with tab1:
     st.header('Auswahl des Wärmeversorgungssystem')
 
@@ -69,6 +84,7 @@ with tab1:
                 f'{topopath+shortnames[unit]}.png', use_column_width=True
                 )
 
+# %% MARK: Unit Parameters
 with tab2:
     st.header('Parametrisierung der Wärmeversorgungsanlagen')
 
@@ -123,6 +139,7 @@ with tab2:
                             )
                         )
 
+# %% MARK: Heat Load
 with tab3:
     st.header('Wärmeversorgungsdaten')
 
@@ -131,7 +148,7 @@ with tab3:
 
     dataset_name = col_sel.selectbox(
         'Wähle die Wärmelastdaten aus, die im System zu verwenden sind',
-        ['Flensburg', 'Sonderburg', 'Eigene Daten'],
+        [*ss.all_heat_load.columns, 'Eigene Daten'],
         placeholder='Wärmelastendaten'
     )
 
@@ -157,25 +174,18 @@ with tab3:
             elif user_file.lower().endswith('xlsx'):
                 heat_load = pd.read_excel(user_file, index_col=0)
 
-    elif dataset_name == 'Flensburg':
+    else:
+        heat_load_years = ss.all_heat_load.loc[
+            ~ss.all_heat_load[dataset_name].isna(), dataset_name
+            ].index.year.unique()
         heat_load_year = col_sel.selectbox(
             'Wähle das Jahr der Wärmelastdaten aus',
-            ['2014', '2015', '2016', '2017', '2018', '2019'],
+            heat_load_years, index=len(heat_load_years)-1,
             placeholder='Betrachtungsjahr'
         )
-    elif dataset_name == 'Sonderburg':
-        heat_load_year = col_sel.selectbox(
-            'Wähle das Jahr der Wärmelastdaten aus',
-            ['2016', '2017', '2018', '2019'],
-            placeholder='Betrachtungsjahr'
-        )
-    heat_load_path = os.path.join(
-        __file__, '..', '..', 'input', 'heat_load',
-        f'heat_load_{dataset_name}_{heat_load_year}.csv'
-    )
-    heat_load = pd.read_csv(
-        heat_load_path, sep=';', index_col=0, parse_dates=True
-        )
+        yearmask = ss.all_heat_load.index.year == heat_load_year
+        heat_load = ss.all_heat_load.loc[yearmask, dataset_name]
+        heat_load = heat_load[heat_load.notna()].to_frame()
 
     if heat_load_year:
         precise_dates = col_sel.toggle(
@@ -200,7 +210,7 @@ with tab3:
     heat_load.rename(columns={heat_load.columns[0]: 'heat_load'}, inplace=True)
     heat_load.index.names = ['Date']
     heat_load.reset_index(inplace=True)
-    print(heat_load)
+
     col_vis.altair_chart(
         alt.Chart(heat_load).mark_line(color='#EC6707').encode(
             y=alt.Y('heat_load', title='Stündliche Wärmelast in MWh'),
@@ -214,6 +224,7 @@ with tab3:
     heat_revenue = 80.00
     st.number_input('Wärmeerlös in €/MWh', value=heat_revenue, key='heat_revenue')
 
+# %% MARK: Electricity
 with tab4:
     st.header('Elektrizitätsversorgungsdaten')
     st.info(
@@ -243,5 +254,7 @@ with tab4:
     spotmarket_data = col_vis_el.toggle('Spotmarktdaten anpassen')
 
     col_vis_el.subheader('Emissionsfaktoren')
+
+# %% MARK: Gas
 with tab5:
     st.header('Gasversorgungsdaten')
