@@ -208,6 +208,35 @@ with tab3:
                 ]
             heat_load = heat_load.loc[dates[0]:dates[1], :]
 
+        scale_hl = col_sel.toggle('Daten skalieren')
+        if scale_hl:
+            scale_method = col_sel.selectbox('Methode', ['Faktor', 'Erweitert'])
+            if scale_method == 'Faktor':
+                scale_factor = col_sel.number_input(
+                    'Skalierungsfaktor', value=1.0, step=0.1, min_value=0.0
+                    )
+                heat_load[dataset_name] *= scale_factor
+            elif scale_method == 'Erweitert':
+                scale_amp = col_sel.number_input(
+                    'Stauchungsfaktor', value=1.0, step=0.1, min_value=0.0,
+                    help='Staucht die Lastdaten um den Median.'
+                    )
+                scale_off = col_sel.number_input(
+                    'Offset', value=1.0, step=0.1,
+                    help='Verschiebt den Median der Lastdaten.'
+                    )
+                heat_load_median = heat_load[dataset_name].median()
+                heat_load[dataset_name] = (
+                    (heat_load[dataset_name] - heat_load_median) * scale_amp
+                    + heat_load_median + scale_off
+                    )
+                # negative_mask = heat_load[dataset_name] < 0
+                if (heat_load[dataset_name] < 0).values.any():
+                    st.error(
+                        'Durch die Skalierung resultiert eine negative '
+                        + 'Wärmelast. Bitte den Offset anpassen.'
+                        )
+
     if user_file is not None or dataset_name != 'Eigene Daten':
         heat_load.rename(columns={heat_load.columns[0]: 'heat_load'}, inplace=True)
         heat_load.index.names = ['Date']
