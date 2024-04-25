@@ -12,11 +12,16 @@ from streamlit import session_state as ss
 @st.cache_data
 def read_input_data():
     """Read in input data all at once."""
-    ahlpath = os.path.abspath(os.path.join(
-        os.path.dirname(__file__), '..', 'input', 'heat_load.csv'
+    inputpath = os.path.abspath(os.path.join(
+        os.path.dirname(__file__), '..', 'input'
         ))
     ss.all_heat_load = pd.read_csv(
-        ahlpath, sep=';', index_col=0, parse_dates=True
+        os.path.join(inputpath, 'heat_load.csv'),
+        sep=';', index_col=0, parse_dates=True
+        )
+    ss.all_el_prices = pd.read_csv(
+        os.path.join(inputpath, 'el_price.csv'),
+        sep=';', index_col=0, parse_dates=True
         )
 
 # %% MARK: Parameters
@@ -188,9 +193,10 @@ with tab3:
         heat_load = ss.all_heat_load.loc[yearmask, dataset_name]
         heat_load = heat_load[heat_load.notna()].to_frame()
 
+    dates = None
     if dataset_name != 'Eigene Daten':
         precise_dates = col_sel.toggle(
-            'Exakten Zeitraum wählen'
+            'Exakten Zeitraum wählen', key='prec_dates_heat_load'
         )
         if precise_dates:
             dates = col_sel.date_input(
@@ -201,7 +207,7 @@ with tab3:
                     ),
                 min_value=date(int(heat_load_year), 1, 1),
                 max_value=date(int(heat_load_year), 12, 31),
-                format='DD.MM.YYYY'
+                format='DD.MM.YYYY', key='date_picker_heat_load'
                 )
             dates = [
                 datetime(year=d.year, month=d.month, day=d.day) for d in dates
@@ -258,33 +264,61 @@ with tab3:
 # %% MARK: Electricity
 with tab4:
     st.header('Elektrizitätsversorgungsdaten')
-    st.info(
-        'Das Start- und Enddatum der Strompreiszeitreihe entsprechen denen der '
-        + 'zuvor ausgewählten Wäremlast. Beim Ändern der Strommarktpreise muss '
-        + 'das Start- und Enddatum sowie die Zeitschritte mit denen der '
-        + 'Wärmelast identisch sein.'
-    )
-    
     col_elp, col_vis_el = st.columns([1, 2])
+
+    col_elp.subheader('Spotmarkt Strompreisdaten')
+
+    el_prices_years = list(ss.all_el_prices.index.year.unique())
+    el_prices_year = col_elp.selectbox(
+        'Wähle das Jahr der Strompreisdaten aus',
+        el_prices_years, index=el_prices_years.index(heat_load_year),
+        placeholder='Betrachtungsjahr'
+    )
+    el_prices = ss.all_el_prices[ss.all_el_prices.index.year == el_prices_year]
+
+    precise_dates = col_elp.toggle(
+        'Exakten Zeitraum wählen', key='prec_dates_el_prices'
+        )
+    if precise_dates:
+        el_dates = col_elp.date_input(
+            'Zeitraum auswählen:',
+            value=dates if dates is not None else (
+                date(int(heat_load_year), 3, 28),
+                date(int(heat_load_year), 7, 2)
+                ),
+            min_value=date(int(heat_load_year), 1, 1),
+            max_value=date(int(heat_load_year), 12, 31),
+            format='DD.MM.YYYY', key='date_picker_el_prices'
+            )
+        el_dates = [
+            datetime(year=d.year, month=d.month, day=d.day) for d in el_dates
+            ]
+        el_prices = el_prices.loc[el_dates[0]:el_dates[1], :]
+
+    nr_steps_hl = len(heat_load.index)
+    nr_steps_el = len(el_prices.index)
+    if nr_steps_hl != nr_steps_el:
+        st.error(
+            f'Die Anzahl der Zeitschritte der Wärmelastdaten ({nr_steps_hl}) '
+            + f'stimmt nicht mit denen der Strompreiszeitreihe ({nr_steps_el}) '
+            + 'überein. Bitte die Daten angleichen.'
+            )
 
     col_elp.subheader('Strompreisbestandteile')
     # csv einlesen
     # for schleife wie bei Anlagenparameter
 
-    col_vis_el.subheader('Strommarktpreise')
-    # data_path = os.path.join(
-    #     __file__, '..', '..', 'input', 'heat_load',
-    #     f'heat_load_{dataset_name}_{heat_load_year}.csv'
-    #     )
-    # data = pd.read_csv(data_path, sep=';', index_col=0, parse_dates=True)
-    # data = data.loc[dates[0]:dates[1], :]
+    col_vis_el.subheader('Spotmarkt Strompreise')
+    el_prices.reset_index(inplace=True)
+    col_vis_el.altair_chart(
+        alt.Chart(el_prices).mark_line(color='#00395B').encode(
+            y=alt.Y('El Price', title='Day-Ahead Spotmarkt Strompreise in €/MWh'),
+            x=alt.X('Date', title='Datum')
+            ),
+        use_container_width=True
+        )
 
-    # col_vis_el.line_chart(
-    #     data['spotmarket'], color='#EC6707',use_container_width=True
-    # )
-    spotmarket_data = col_vis_el.toggle('Spotmarktdaten anpassen')
-
-    col_vis_el.subheader('Emissionsfaktoren')
+    col_vis_el.subheader('Emissionsfaktoren des Strommixes')
 
 # %% MARK: Gas
 with tab5:
