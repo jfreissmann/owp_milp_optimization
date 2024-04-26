@@ -9,6 +9,7 @@ import streamlit as st
 from streamlit import session_state as ss
 
 
+# %% MARK: Read Input Data
 @st.cache_data
 def read_input_data():
     """Read in input data all at once."""
@@ -19,10 +20,11 @@ def read_input_data():
         os.path.join(inputpath, 'heat_load.csv'),
         sep=';', index_col=0, parse_dates=True
         )
-    ss.all_el_prices = pd.read_csv(
-        os.path.join(inputpath, 'el_price.csv'),
+    ss.eco_data = pd.read_csv(
+        os.path.join(inputpath, 'eco_data.csv'),
         sep=';', index_col=0, parse_dates=True
         )
+    ss.all_el_prices = ss.eco_data['El Price'].to_frame()
 
 # %% MARK: Parameters
 is_dark = darkdetect.isDark()
