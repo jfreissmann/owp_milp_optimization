@@ -51,6 +51,9 @@ with open(unitpath, 'r', encoding='utf-8') as file:
 unitinputpath = os.path.join(__file__, '..', '..', 'input', 'unit_inputs.json')
 with open(unitinputpath, 'r', encoding='utf-8') as file:
     ss.unit_inputs = json.load(file)
+boundinputpath = os.path.join(__file__, '..', '..', 'input', 'param_bound.json')
+with open(boundinputpath, 'r', encoding='utf-8') as file:
+    ss.bound_inputs = json.load(file)
 
 # %% MARK: Sidebar
 with st.sidebar:
@@ -305,8 +308,7 @@ with tab4:
             )
 
     col_elp.subheader('Strompreisbestandteile')
-    # csv einlesen
-    # for schleife wie bei Anlagenparameter
+    col_elp.dataframe(ss.bound_inputs[str(el_prices_year)])
 
     col_vis_el.subheader('Spotmarkt Strompreise')
     el_prices.reset_index(inplace=True)

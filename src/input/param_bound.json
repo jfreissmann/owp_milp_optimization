@@ -1,6 +1,6 @@
 {
     "2014": {
-        "Stromkosten_extern": {
+        "Stromkosten (extern)": {
             "EEG-Umlage": 6.240,
             "Netzentgelte": 1.90,
             "KWKG-Umlage": 0.055,
@@ -10,7 +10,7 @@
             "Konzessionsabgabe": 0.11,
             "Stromsteuer": 2.05
         },
-        "Stromkosten_intern": {
+        "Stromkosten (intern)": {
             "EEG-Umlage": 1.872,
             "Netzentgelte": 0.0,
             "KWKG-Umlage": 0.0,
@@ -19,9 +19,10 @@
             "StromNEV-Umlage §19 Umlage": 0.0,
             "Konzessionsabgabe": 0.0,
             "Stromsteuer": 2.05
-        },
+        }
+    },
     "2015": {
-        "Stromkosten_extern": {
+        "Stromkosten (extern)": {
             "EEG-Umlage": 6.17,
             "Netzentgelte": 2.12,
             "KWKG-Umlage": 0.051,
@@ -31,7 +32,7 @@
             "Konzessionsabgabe": 0.11,
             "Stromsteuer": 2.05
         },
-        "Stromkosten_intern": {
+        "Stromkosten (intern)": {
             "EEG-Umlage": 1.851,
             "Netzentgelte": 0.0,
             "KWKG-Umlage": 0.0,
@@ -40,9 +41,10 @@
             "StromNEV-Umlage §19 Umlage": 0.0,
             "Konzessionsabgabe": 0.0,
             "Stromsteuer": 2.05
-        },
+        }
+    },
     "2016": {
-        "Stromkosten_extern": {
+        "Stromkosten (extern)": {
             "EEG-Umlage": 6.354,
             "Netzentgelte": 2.06,
             "KWKG-Umlage": 0.06,
@@ -52,7 +54,7 @@
             "Konzessionsabgabe": 0.11,
             "Stromsteuer": 2.05
         },
-        "Stromkosten_intern": {
+        "Stromkosten (intern)": {
             "EEG-Umlage": 2.224,
             "Netzentgelte": 0.0,
             "KWKG-Umlage": 0.0,
@@ -61,9 +63,10 @@
             "StromNEV-Umlage §19 Umlage": 0.0,
             "Konzessionsabgabe": 0.0,
             "Stromsteuer": 2.05
-        },
+        }
+    },
     "2017": {
-        "Stromkosten_extern": {
+        "Stromkosten (extern)": {
             "EEG-Umlage": 6.88,
             "Netzentgelte": 2.26,
             "KWKG-Umlage": 0.095,
@@ -73,7 +76,7 @@
             "Konzessionsabgabe": 0.11,
             "Stromsteuer": 2.05
         },
-        "Stromkosten_intern": {
+        "Stromkosten (intern)": {
             "EEG-Umlage": 2.752,
             "Netzentgelte": 0.0,
             "KWKG-Umlage": 0.0,
@@ -82,9 +85,10 @@
             "StromNEV-Umlage §19 Umlage": 0.0,
             "Konzessionsabgabe": 0.0,
             "Stromsteuer": 2.05
-            },
+        }
+    },
     "2018": {
-        "Stromkosten_extern": {
+        "Stromkosten (extern)": {
             "EEG-Umlage": 6.792,
             "Netzentgelte": 2.36,
             "KWKG-Umlage": 0.168,
@@ -94,7 +98,7 @@
             "Konzessionsabgabe": 0.11,
             "Stromsteuer": 2.05
         },
-        "Stromkosten_intern": {
+        "Stromkosten (intern)": {
             "EEG-Umlage": 2.717,
             "Netzentgelte": 0.0,
             "KWKG-Umlage": 0.0,
@@ -103,9 +107,10 @@
             "StromNEV-Umlage §19 Umlage": 0.0,
             "Konzessionsabgabe": 0.0,
             "Stromsteuer": 2.05
-        },
+        }
+    },
     "2019": {
-        "Stromkosten_extern": {
+        "Stromkosten (extern)": {
             "EEG-Umlage": 6.405,
             "Netzentgelte": 2.33,
             "KWKG-Umlage": 0.28,
@@ -115,7 +120,7 @@
             "Konzessionsabgabe": 0.11,
             "Stromsteuer": 2.05
         },
-        "Stromkosten_intern": {
+        "Stromkosten (intern)": {
             "EEG-Umlage": 2.562,
             "Netzentgelte": 0.0,
             "KWKG-Umlage": 0.0,
@@ -124,9 +129,10 @@
             "StromNEV-Umlage §19 Umlage": 0.0,
             "Konzessionsabgabe": 0.0,
             "Stromsteuer": 2.05
-        },
+        }
+    },
     "2020": {
-        "Stromkosten_extern": {
+        "Stromkosten (extern)": {
             "EEG-Umlage": 6.756,
             "Netzentgelte": 2.7,
             "KWKG-Umlage": 0.226,
@@ -136,7 +142,7 @@
             "Konzessionsabgabe": 0.12,
             "Stromsteuer": 2.05
         },
-        "Stromkosten_intern": {
+        "Stromkosten (intern)": {
             "EEG-Umlage": 2.702,
             "Netzentgelte": 0.0,
             "KWKG-Umlage": 0.0,
@@ -145,6 +151,6 @@
             "StromNEV-Umlage §19 Umlage": 0.0,
             "Konzessionsabgabe": 0.0,
             "Stromsteuer": 2.05
-        },
+        }
     }
 }
