@@ -9,6 +9,7 @@ import streamlit as st
 from streamlit import session_state as ss
 
 
+# %% MARK: Read Input Data
 @st.cache_data
 def read_input_data():
     """Read in input data all at once."""
@@ -19,10 +20,12 @@ def read_input_data():
         os.path.join(inputpath, 'heat_load.csv'),
         sep=';', index_col=0, parse_dates=True
         )
-    ss.all_el_prices = pd.read_csv(
-        os.path.join(inputpath, 'el_price.csv'),
+    ss.eco_data = pd.read_csv(
+        os.path.join(inputpath, 'eco_data.csv'),
         sep=';', index_col=0, parse_dates=True
         )
+    ss.all_el_prices = ss.eco_data['El Price'].to_frame()
+    ss.all_el_emissions = ss.eco_data['Emissionsfaktor Gesamtmix'].to_frame()
 
 # %% MARK: Parameters
 is_dark = darkdetect.isDark()
@@ -278,6 +281,7 @@ with tab4:
         placeholder='Betrachtungsjahr'
     )
     el_prices = ss.all_el_prices[ss.all_el_prices.index.year == el_prices_year]
+    el_em = ss.all_el_emissions[ss.all_el_emissions.index.year == el_prices_year]
 
     precise_dates = col_elp.toggle(
         'Exakten Zeitraum wählen', key='prec_dates_el_prices'
@@ -297,6 +301,7 @@ with tab4:
             datetime(year=d.year, month=d.month, day=d.day) for d in el_dates
             ]
         el_prices = el_prices.loc[el_dates[0]:el_dates[1], :]
+        el_em = el_em.loc[el_dates[0]:el_dates[1], :]
 
     nr_steps_hl = len(heat_load.index)
     nr_steps_el = len(el_prices.index)
@@ -314,13 +319,26 @@ with tab4:
     el_prices.reset_index(inplace=True)
     col_vis_el.altair_chart(
         alt.Chart(el_prices).mark_line(color='#00395B').encode(
-            y=alt.Y('El Price', title='Day-Ahead Spotmarkt Strompreise in €/MWh'),
+            y=alt.Y(
+                'El Price', title='Day-Ahead Spotmarkt Strompreise in €/MWh'
+                ),
             x=alt.X('Date', title='Datum')
             ),
         use_container_width=True
         )
 
     col_vis_el.subheader('Emissionsfaktoren des Strommixes')
+    el_em.reset_index(inplace=True)
+    col_vis_el.altair_chart(
+        alt.Chart(el_em).mark_line(color='#74ADC0').encode(
+            y=alt.Y(
+                'Emissionsfaktor Gesamtmix',
+                title='Emissionsfaktor des Gesamtmix kg/MWh'
+                ),
+            x=alt.X('Date', title='Datum')
+            ),
+        use_container_width=True
+        )
 
 # %% MARK: Gas
 with tab5:
