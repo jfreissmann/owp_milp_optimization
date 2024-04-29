@@ -155,7 +155,7 @@ with tab3:
     st.header('Wärmeversorgungsdaten')
 
     st.subheader('Wärmelastdaten')
-    col_sel, col_vis = st.columns([1, 2])
+    col_sel, col_vis = st.columns([1, 2], gap='large')
 
     dataset_name = col_sel.selectbox(
         'Wähle die Wärmelastdaten aus, die im System zu verwenden sind',
@@ -262,15 +262,15 @@ with tab3:
             use_container_width=True
         )
 
-    st.subheader('Wärmeerlöse')
+    col_sel.subheader('Wärmeerlöse')
 
     heat_revenue = 80.00
-    st.number_input('Wärmeerlös in €/MWh', value=heat_revenue, key='heat_revenue')
+    col_sel.number_input('Wärmeerlös in €/MWh', value=heat_revenue, key='heat_revenue')
 
 # %% MARK: Electricity
 with tab4:
     st.header('Elektrizitätsversorgungsdaten')
-    col_elp, col_vis_el = st.columns([1, 2])
+    col_elp, col_vis_el = st.columns([1, 2], gap='large')
 
     col_elp.subheader('Spotmarkt Strompreisdaten')
 
@@ -313,7 +313,9 @@ with tab4:
             )
 
     col_elp.subheader('Strompreisbestandteile')
-    col_elp.dataframe(ss.bound_inputs[str(el_prices_year)])
+    col_elp.dataframe(
+        ss.bound_inputs[str(el_prices_year)], use_container_width=True
+        )
 
     col_vis_el.subheader('Spotmarkt Strompreise')
     el_prices.reset_index(inplace=True)
