@@ -156,7 +156,6 @@ with tab2:
 with tab3:
     st.header('Wärmeversorgungsdaten')
 
-    st.subheader('Wärmelastdaten')
     col_sel, col_vis = st.columns([1, 2], gap='large')
 
     dataset_name = col_sel.selectbox(
@@ -251,6 +250,8 @@ with tab3:
                         + 'Wärmelast. Bitte den Offset anpassen.'
                         )
 
+    col_vis.subheader('Wärmelastdaten')
+
     if user_file is not None or dataset_name != 'Eigene Daten':
         heat_load.rename(columns={heat_load.columns[0]: 'heat_load'}, inplace=True)
         heat_load.index.names = ['Date']
@@ -267,14 +268,14 @@ with tab3:
     col_sel.subheader('Wärmeerlöse')
 
     heat_revenue = 80.00
-    col_sel.number_input('Wärmeerlös in €/MWh', value=heat_revenue, key='heat_revenue')
+    heat_revenue = col_sel.number_input(
+        'Wärmeerlös in €/MWh', value=heat_revenue, key='heat_revenue'
+        )
 
 # %% MARK: Electricity
 with tab4:
     st.header('Elektrizitätsversorgungsdaten')
     col_elp, col_vis_el = st.columns([1, 2], gap='large')
-
-    col_elp.subheader('Spotmarkt Strompreisdaten')
 
     el_prices_years = list(ss.all_el_prices.index.year.unique())
     el_prices_year = col_elp.selectbox(
@@ -344,12 +345,10 @@ with tab4:
         use_container_width=True
         )
 
-# %% MARK: Gas
+# %% MARK: Gas & CO₂
 with tab5:
     st.header('Gasversorgungsdaten')
     col_gas, col_vis_gas = st.columns([1, 2], gap='large')
-
-    col_gas.subheader('Gaspeisdaten')
 
     gas_prices_years = list(ss.all_el_prices.index.year.unique())
     gas_prices_year = col_gas.selectbox(
@@ -358,6 +357,7 @@ with tab5:
         placeholder='Betrachtungsjahr'
     )
     gas_prices = ss.all_gas_prices[ss.all_gas_prices.index.year == gas_prices_year]
+    co2_prices = ss.all_co2_prices[ss.all_co2_prices.index.year == gas_prices_year]
 
     precise_dates = col_gas.toggle(
         'Exakten Zeitraum wählen', key='prec_dates_gas_prices'
@@ -387,12 +387,33 @@ with tab5:
             + 'überein. Bitte die Daten angleichen.'
             )
 
-    col_vis_gas.subheader('Spotmarkt Strompreise')
+    col_vis_gas.subheader('Gaspreis')
     gas_prices.reset_index(inplace=True)
     col_vis_gas.altair_chart(
         alt.Chart(gas_prices).mark_line(color='#B54036').encode(
             y=alt.Y(
                 'Gaspreis', title='Gaspreise in €/MWh'
+                ),
+            x=alt.X('Date', title='Datum')
+            ),
+        use_container_width=True
+        )
+
+    col_gas.subheader('Emissionsfaktor Gas')
+    ef_gas = 201.2
+    ef_gas = col_gas.number_input(
+        'Emissionsfatkor in kg CO₂/MWh', value=ef_gas, key='ef_gas'
+        )
+    ef_gas /= 1000
+
+    col_vis_gas.subheader('CO₂-Preise')
+    co2_prices['CO2-Preis'] *= ef_gas
+    co2_prices.reset_index(inplace=True)
+    col_vis_gas.altair_chart(
+        alt.Chart(co2_prices).mark_line(color='#74ADC0').encode(
+            y=alt.Y(
+                'CO2-Preis',
+                title='CO₂-Preise in €/MWh'
                 ),
             x=alt.X('Date', title='Datum')
             ),
