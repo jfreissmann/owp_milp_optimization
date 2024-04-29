@@ -26,6 +26,8 @@ def read_input_data():
         )
     ss.all_el_prices = ss.eco_data['El Price'].to_frame()
     ss.all_el_emissions = ss.eco_data['Emissionsfaktor Gesamtmix'].to_frame()
+    ss.all_gas_prices = ss.eco_data['Gaspreis'].to_frame()
+    ss.all_co2_prices = ss.eco_data['CO2-Preis'].to_frame()
 
 # %% MARK: Parameters
 is_dark = darkdetect.isDark()
@@ -345,3 +347,54 @@ with tab4:
 # %% MARK: Gas
 with tab5:
     st.header('Gasversorgungsdaten')
+    col_gas, col_vis_gas = st.columns([1, 2], gap='large')
+
+    col_gas.subheader('Gaspeisdaten')
+
+    gas_prices_years = list(ss.all_el_prices.index.year.unique())
+    gas_prices_year = col_gas.selectbox(
+        'Wähle das Jahr der Gaspreisdaten aus',
+        gas_prices_years, index=gas_prices_years.index(heat_load_year),
+        placeholder='Betrachtungsjahr'
+    )
+    gas_prices = ss.all_gas_prices[ss.all_gas_prices.index.year == gas_prices_year]
+
+    precise_dates = col_gas.toggle(
+        'Exakten Zeitraum wählen', key='prec_dates_gas_prices'
+        )
+    if precise_dates:
+        gas_dates = col_gas.date_input(
+            'Zeitraum auswählen:',
+            value=dates if dates is not None else (
+                date(int(heat_load_year), 3, 28),
+                date(int(heat_load_year), 7, 2)
+                ),
+            min_value=date(int(heat_load_year), 1, 1),
+            max_value=date(int(heat_load_year), 12, 31),
+            format='DD.MM.YYYY', key='date_picker_gas_prices'
+            )
+        gas_dates = [
+            datetime(year=d.year, month=d.month, day=d.day) for d in gas_dates
+            ]
+        gas_prices = gas_prices.loc[gas_dates[0]:gas_dates[1], :]
+
+    nr_steps_hl = len(heat_load.index)
+    nr_steps_gas = len(gas_prices.index)
+    if nr_steps_hl != nr_steps_gas:
+        st.error(
+            f'Die Anzahl der Zeitschritte der Wärmelastdaten ({nr_steps_hl}) '
+            + f'stimmt nicht mit denen der Strompreiszeitreihe ({nr_steps_gas}) '
+            + 'überein. Bitte die Daten angleichen.'
+            )
+
+    col_vis_gas.subheader('Spotmarkt Strompreise')
+    gas_prices.reset_index(inplace=True)
+    col_vis_gas.altair_chart(
+        alt.Chart(gas_prices).mark_line(color='#B54036').encode(
+            y=alt.Y(
+                'Gaspreis', title='Gaspreise in €/MWh'
+                ),
+            x=alt.X('Date', title='Datum')
+            ),
+        use_container_width=True
+        )
