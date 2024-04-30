@@ -22,10 +22,13 @@ with st.sidebar:
     st.image(logo, use_column_width=True)
 
 # %% Main Window
-logo_width = 0.25
-col_logo, _ = st.columns([logo_width, 1-logo_width])
+col_inno, _, col_foerder = st.columns([0.3, 0.4, 0.3])
 logo = os.path.join(__file__, '..', 'img', 'Logo_InnoNord_OWP.png')
-col_logo.image(logo)
+col_inno.image(logo, use_column_width=True)
+
+logo_foederer = os.path.join(__file__, '..', 'img', 'Logos_Förderer.png')
+col_foerder.image(logo_foederer, use_column_width=True)
+
 
 st.write(
     """
@@ -47,8 +50,16 @@ st.write(
     - Parametrisierung and Ergebnisvisualisierung mithilfe eines [Streamlit](https://github.com/streamlit/streamlit) Dashboards
     - Breite Auswahl typischer Wärmeversorgungsanlagen
     - Umfangreiche Datenbank von Lastdaten, Preiszeitreihen und Emissionsfaktoren
+
+    ### Assoziierte Projektpartner
     """
     )
+
+_, col_partner, _ = st.columns([0.1 ,0.8, 0.1])
+logo_partner = os.path.join(__file__, '..', 'img', 'Logos_Partner_transparent.png')
+col_partner.image(logo_partner, use_column_width=True)
+
+
 
 st.markdown("""---""")
 
