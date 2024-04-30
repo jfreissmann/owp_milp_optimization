@@ -72,9 +72,6 @@ with st.sidebar:
             )
     st.image(logo, use_column_width=True)
 
-def do_stuff():
-    st.session_state["counter"] += 1
-
 tab1, tab2, tab3, tab4, tab5 = st.tabs(
     ['System', 'Anlagen', 'Wärme', 'Elektrizität', 'Gas']
     )
