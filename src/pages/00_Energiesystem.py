@@ -3,7 +3,6 @@ import os
 from datetime import date, datetime, time, timedelta
 
 import altair as alt
-import darkdetect
 import pandas as pd
 import streamlit as st
 from streamlit import session_state as ss
@@ -30,7 +29,6 @@ def read_input_data():
     ss.all_co2_prices = ss.eco_data['CO2-Preis'].to_frame()
 
 # %% MARK: Parameters
-is_dark = darkdetect.isDark()
 shortnames = {
     'Wärmepumpe': 'hp',
     'Gas- und Dampfkratwerk': 'ccet',
@@ -62,14 +60,9 @@ with open(boundinputpath, 'r', encoding='utf-8') as file:
 
 # %% MARK: Sidebar
 with st.sidebar:
-    if is_dark:
-        logo = os.path.join(
-            __file__, '..', '..', 'img', 'Logo_ZNES_mitUnisV2_dark.svg'
-            )
-    else:
-        logo = os.path.join(
-            __file__, '..', '..', 'img', 'Logo_ZNES_mitUnisV2.svg'
-            )
+    logo = os.path.join(
+        __file__, '..', '..', 'img', 'Logo_ZNES_mitUnisV2.svg'
+        )
     st.image(logo, use_column_width=True)
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(
