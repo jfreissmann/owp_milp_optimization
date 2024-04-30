@@ -434,3 +434,11 @@ with tab5:
             ),
         use_container_width=True
         )
+
+# %% MARK: Aggregate Data
+ss.data = pd.concat(
+    [heat_load, el_prices['El Price'], el_em['Emissionsfaktor Gesamtmix'],
+     gas_prices['Gaspreis'], co2_prices['CO2-Preis']],
+    axis=1
+    )
+ss.data.set_index('Date', inplace=True, drop=True)
