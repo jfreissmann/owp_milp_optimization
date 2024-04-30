@@ -54,6 +54,12 @@ unitpath = os.path.abspath(
 with open(unitpath, 'r', encoding='utf-8') as file:
     ss.param_units = json.load(file)
 
+optpath = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..', 'input', 'param_opt.json')
+    )
+with open(optpath, 'r', encoding='utf-8') as file:
+    ss.param_opt = json.load(file)
+
 unitinputpath = os.path.abspath(
     os.path.join(os.path.dirname(__file__),'..', 'input', 'unit_inputs.json')
     )
@@ -272,9 +278,9 @@ with tab3:
 
     col_sel.subheader('Wärmeerlöse')
 
-    heat_revenue = 80.00
-    heat_revenue = col_sel.number_input(
-        'Wärmeerlös in €/MWh', value=heat_revenue, key='heat_revenue'
+    ss.param_opt['heat_price'] = col_sel.number_input(
+        'Wärmeerlös in €/MWh', value=ss.param_opt['heat_price'],
+        key='heat_revenue'
         )
 
 # %% MARK: Electricity
@@ -332,8 +338,19 @@ with tab4:
 
     col_elp.subheader('Strompreisbestandteile')
     col_elp.dataframe(
-        ss.bound_inputs[str(el_prices_year)], use_container_width=True
+        {f'{k} in ct/kWh': v
+         for k, v in ss.bound_inputs[str(el_prices_year)].items()},
+        use_container_width=True
         )
+
+    cons_charger = ss.bound_inputs[str(el_prices_year)]
+    ss.param_opt['elec_consumer_charges_grid'] = round(sum(
+        val*10 for val in cons_charger['Stromkosten (extern)'].values()
+        ), 2)
+    ss.param_opt['elec_consumer_charges_self'] = round(sum(
+        val*10 for val in cons_charger['Stromkosten (intern)'].values()
+        ), 2)
+
 
     col_vis_el.subheader('Spotmarkt Strompreise')
     el_prices.reset_index(inplace=True)
@@ -425,14 +442,14 @@ with tab5:
         )
 
     col_gas.subheader('Emissionsfaktor Gas')
-    ef_gas = 201.2
-    ef_gas = col_gas.number_input(
-        'Emissionsfatkor in kg CO₂/MWh', value=ef_gas, key='ef_gas'
+    ss.param_opt['ef_gas'] = col_gas.number_input(
+        'Emissionsfatkor in kg CO₂/MWh', value=ss.param_opt['ef_gas']*1e3,
+        key='ef_gas'
         )
-    ef_gas /= 1000
+    ss.param_opt['ef_gas'] *= 1e-3
 
     col_vis_gas.subheader('CO₂-Preise')
-    co2_prices['CO2-Preis'] *= ef_gas
+    co2_prices['CO2-Preis'] *= ss.param_opt['ef_gas']
     co2_prices.reset_index(inplace=True)
     col_vis_gas.altair_chart(
         alt.Chart(co2_prices).mark_line(color='#74ADC0').encode(
