@@ -22,6 +22,11 @@ with st.sidebar:
     st.image(logo, use_column_width=True)
 
 # %% Main Window
+logo_width = 0.25
+col_logo, _ = st.columns([logo_width, 1-logo_width])
+logo = os.path.join(__file__, '..', 'img', 'Logo_InnoNord_OWP.png')
+col_logo.image(logo)
+
 st.write(
     """
     Willkommen in dem Optimierungsdashboard des Projektes "Offene Wärmespeicherplanung"
@@ -61,12 +66,12 @@ with st.expander('Verwendete Software'):
 
         #### oemof.solph:
 
-        Oemof-solpf als Teil des Open Energy Modelling Framework ist ein
-        leistungsfähiges Simulationswerkzeug für Energiesysteme. Mit dem Paket
-        ist es möglich, den Anlageneinsatz zu optimieren und die Kapazität dieser
-        auszulegen. Die komponentenbasierte Struktur in
-        Kombination mit den generischen Anlagenklassen bieten eine sehr hohe
-        Flexibilität hinsichtlich der Systemtopologie und der
+        Das Softwarepaket oemof.solpf als Teil des Open Energy Modelling
+        Framework ist ein leistungsfähiges Simulationswerkzeug für
+        Energiesysteme. Mit dem Paket ist es möglich, den Anlageneinsatz zu
+        optimieren und die Kapazität dieser auszulegen. Die komponentenbasierte
+        Struktur in Kombination mit den generischen Anlagenklassen bieten eine
+        sehr hohe Flexibilität hinsichtlich der Systemtopologie und der
         Parametrisierung. Weitere Informationen zu oemof.solph sind in dessen
         [Onlinedokumentation](https://oemof-solph.readthedocs.io) in
         englischer Sprache zu finden.
