@@ -45,7 +45,7 @@ st.write(
     )
 
 st.page_link(
-    "pages/00_Energiesystem.py", label=":red[Energiesystem konfigurieren]",
+    "pages/00_Energiesystem.py", label="Energiesystem konfigurieren",
     icon="🔬", use_container_width=True,
     )
 
