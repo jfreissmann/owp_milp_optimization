@@ -38,7 +38,7 @@ st.write(
 
     ### Key Features
 
-    - Kombiniert Auslegungs- und Einsatzoptimierung basierend auf [oemof-solph](https://github.com/oemof/oemof-solph)
+    - Kombiniert Auslegungs- und Einsatzoptimierung basierend auf [oemof.solph](https://github.com/oemof/oemof-solph)
     - Parametrisierung and Ergebnisvisualisierung mithilfe eines [Streamlit](https://github.com/streamlit/streamlit) Dashboards
     - Breite Auswahl typischer Wärmeversorgungsanlagen
     - Umfangreiche Datenbank von Lastdaten, Preiszeitreihen und Emissionsfaktoren
@@ -53,13 +53,13 @@ with st.expander('Verwendete Software'):
         #### Verwendete Software:
 
         Zur Modellerstellung und Simulationen wird die
-        Open Source Software oemof-solph verwendet. Des Weiteren werden
+        Open Source Software oemof.solph verwendet. Des Weiteren werden
         eine Reihe weiterer Pythonpakete zur Datenverarbeitung,
         -aufbereitung und -visualisierung genutzt.
 
         ---
 
-        #### oemof-solph:
+        #### oemof.solph:
 
         Oemof-solpf als Teil des Open Energy Modelling Framework ist ein
         leistungsfähiges Simulationswerkzeug für Energiesysteme. Mit dem Paket
@@ -67,7 +67,7 @@ with st.expander('Verwendete Software'):
         auszulegen. Die komponentenbasierte Struktur in
         Kombination mit den generischen Anlagenklassen bieten eine sehr hohe
         Flexibilität hinsichtlich der Systemtopologie und der
-        Parametrisierung. Weitere Informationen zu oemof-solph sind in dessen
+        Parametrisierung. Weitere Informationen zu oemof.solph sind in dessen
         [Onlinedokumentation](https://oemof-solph.readthedocs.io) in
         englischer Sprache zu finden.
 
