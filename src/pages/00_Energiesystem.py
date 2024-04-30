@@ -157,6 +157,7 @@ with tab3:
         placeholder='Wärmelastendaten'
     )
 
+    heat_load = pd.DataFrame()
     if dataset_name == 'Eigene Daten':
         heat_load_year = None
         tooltip = (
@@ -190,8 +191,9 @@ with tab3:
             placeholder='Betrachtungsjahr'
         )
         yearmask = ss.all_heat_load.index.year == heat_load_year
-        heat_load = ss.all_heat_load.loc[yearmask, dataset_name]
-        heat_load = heat_load[heat_load.notna()].to_frame()
+        heat_load = ss.all_heat_load.loc[
+            yearmask, dataset_name
+            ].copy().to_frame()
 
     dates = None
     if dataset_name != 'Eigene Daten':
@@ -271,13 +273,21 @@ with tab4:
     col_elp, col_vis_el = st.columns([1, 2], gap='large')
 
     el_prices_years = list(ss.all_el_prices.index.year.unique())
+    if heat_load_year:
+        el_year_idx = el_prices_years.index(heat_load_year)
+    else:
+        el_year_idx = len(el_prices_years) - 1
     el_prices_year = col_elp.selectbox(
         'Wähle das Jahr der Strompreisdaten aus',
-        el_prices_years, index=el_prices_years.index(heat_load_year),
+        el_prices_years, index=el_year_idx,
         placeholder='Betrachtungsjahr'
     )
-    el_prices = ss.all_el_prices[ss.all_el_prices.index.year == el_prices_year]
-    el_em = ss.all_el_emissions[ss.all_el_emissions.index.year == el_prices_year]
+    el_prices = ss.all_el_prices[
+        ss.all_el_prices.index.year == el_prices_year
+        ].copy()
+    el_em = ss.all_el_emissions[
+        ss.all_el_emissions.index.year == el_prices_year
+        ].copy()
 
     precise_dates = col_elp.toggle(
         'Exakten Zeitraum wählen', key='prec_dates_el_prices'
@@ -299,14 +309,16 @@ with tab4:
         el_prices = el_prices.loc[el_dates[0]:el_dates[1], :]
         el_em = el_em.loc[el_dates[0]:el_dates[1], :]
 
-    nr_steps_hl = len(heat_load.index)
-    nr_steps_el = len(el_prices.index)
-    if nr_steps_hl != nr_steps_el:
-        st.error(
-            f'Die Anzahl der Zeitschritte der Wärmelastdaten ({nr_steps_hl}) '
-            + f'stimmt nicht mit denen der Strompreiszeitreihe ({nr_steps_el}) '
-            + 'überein. Bitte die Daten angleichen.'
-            )
+    if any(heat_load):
+        nr_steps_hl = len(heat_load.index)
+        nr_steps_el = len(el_prices.index)
+        if nr_steps_hl != nr_steps_el:
+            st.error(
+                'Die Anzahl der Zeitschritte der Wärmelastdaten '
+                + f'({nr_steps_hl}) stimmt nicht mit denen der '
+                + f' Strompreiszeitreihe ({nr_steps_el}) überein. Bitte die '
+                + 'Daten angleichen.'
+                )
 
     col_elp.subheader('Strompreisbestandteile')
     col_elp.dataframe(
@@ -344,13 +356,21 @@ with tab5:
     col_gas, col_vis_gas = st.columns([1, 2], gap='large')
 
     gas_prices_years = list(ss.all_el_prices.index.year.unique())
+    if heat_load_year:
+        gas_year_idx = gas_prices_years.index(heat_load_year)
+    else:
+        gas_year_idx = len(gas_prices_years) - 1
     gas_prices_year = col_gas.selectbox(
         'Wähle das Jahr der Gaspreisdaten aus',
-        gas_prices_years, index=gas_prices_years.index(heat_load_year),
+        gas_prices_years, index=gas_year_idx,
         placeholder='Betrachtungsjahr'
     )
-    gas_prices = ss.all_gas_prices[ss.all_gas_prices.index.year == gas_prices_year]
-    co2_prices = ss.all_co2_prices[ss.all_co2_prices.index.year == gas_prices_year]
+    gas_prices = ss.all_gas_prices[
+        ss.all_gas_prices.index.year == gas_prices_year
+        ].copy()
+    co2_prices = ss.all_co2_prices[
+        ss.all_co2_prices.index.year == gas_prices_year
+        ].copy()
 
     precise_dates = col_gas.toggle(
         'Exakten Zeitraum wählen', key='prec_dates_gas_prices'
@@ -371,14 +391,16 @@ with tab5:
             ]
         gas_prices = gas_prices.loc[gas_dates[0]:gas_dates[1], :]
 
-    nr_steps_hl = len(heat_load.index)
-    nr_steps_gas = len(gas_prices.index)
-    if nr_steps_hl != nr_steps_gas:
-        st.error(
-            f'Die Anzahl der Zeitschritte der Wärmelastdaten ({nr_steps_hl}) '
-            + f'stimmt nicht mit denen der Strompreiszeitreihe ({nr_steps_gas}) '
-            + 'überein. Bitte die Daten angleichen.'
-            )
+    if any(heat_load):
+        nr_steps_hl = len(heat_load.index)
+        nr_steps_gas = len(gas_prices.index)
+        if nr_steps_hl != nr_steps_gas:
+            st.error(
+                'Die Anzahl der Zeitschritte der Wärmelastdaten '
+                + f'({nr_steps_hl}) stimmt nicht mit denen der '
+                + f' Gaspreiszeitreihe ({nr_steps_gas}) überein. Bitte die '
+                + 'Daten angleichen.'
+                )
 
     col_vis_gas.subheader('Gaspreis')
     gas_prices.reset_index(inplace=True)
