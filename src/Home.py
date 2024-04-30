@@ -29,7 +29,6 @@ col_inno.image(logo, use_column_width=True)
 logo_foederer = os.path.join(__file__, '..', 'img', 'Logos_Förderer.png')
 col_foerder.image(logo_foederer, use_column_width=True)
 
-
 st.write(
     """
     Willkommen in dem Optimierungsdashboard des Projektes "Offene Wärmespeicherplanung"
@@ -50,7 +49,16 @@ st.write(
     - Parametrisierung and Ergebnisvisualisierung mithilfe eines [Streamlit](https://github.com/streamlit/streamlit) Dashboards
     - Breite Auswahl typischer Wärmeversorgungsanlagen
     - Umfangreiche Datenbank von Lastdaten, Preiszeitreihen und Emissionsfaktoren
+    """
+    )
 
+st.page_link(
+    "pages/00_Energiesystem.py", label=":red[Energiesystem konfigurieren]",
+    icon="🔬", use_container_width=True,
+    )
+
+st.write(
+    """
     ### Assoziierte Projektpartner
     """
     )
@@ -58,8 +66,6 @@ st.write(
 _, col_partner, _ = st.columns([0.1 ,0.8, 0.1])
 logo_partner = os.path.join(__file__, '..', 'img', 'Logos_Partner_transparent.png')
 col_partner.image(logo_partner, use_column_width=True)
-
-
 
 st.markdown("""---""")
 
