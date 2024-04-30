@@ -48,13 +48,21 @@ longnames = {
 
 read_input_data()
 
-unitpath = os.path.join(__file__, '..', '..', 'input', 'param_units.json')
+unitpath = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..', 'input', 'param_units.json')
+    )
 with open(unitpath, 'r', encoding='utf-8') as file:
     ss.param_units = json.load(file)
-unitinputpath = os.path.join(__file__, '..', '..', 'input', 'unit_inputs.json')
+
+unitinputpath = os.path.abspath(
+    os.path.join(os.path.dirname(__file__),'..', 'input', 'unit_inputs.json')
+    )
 with open(unitinputpath, 'r', encoding='utf-8') as file:
     ss.unit_inputs = json.load(file)
-boundinputpath = os.path.join(__file__, '..', '..', 'input', 'param_bound.json')
+
+boundinputpath = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..', 'input', 'param_bound.json')
+    )
 with open(boundinputpath, 'r', encoding='utf-8') as file:
     ss.bound_inputs = json.load(file)
 
@@ -82,7 +90,9 @@ with tab1:
 
     col_topo, _ = st.columns([1, 2])
 
-    topopath = os.path.join(__file__, '..', '..', 'img', 'es_topology_')
+    topopath = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), '..', 'img', 'es_topology_')
+        )
     if units:
         col_topo.image(f'{topopath}header.png', use_column_width=True)
         for unit in units:
