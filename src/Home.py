@@ -10,7 +10,16 @@ st.set_page_config(
 
 # %% Sidebar
 with st.sidebar:
-    logo = os.path.join(__file__, '..', 'img', 'Logo_ZNES_mitUnisV2.svg')
+    st.subheader('Offene Wärmespeicherplanung')
+
+    logo_inno = os.path.join(
+        os.path.dirname(__file__), 'img', 'Logo_InnoNord_OWP.png'
+        )
+    st.image(logo_inno, use_column_width=True)
+
+    logo = os.path.join(
+        os.path.dirname(__file__), 'img', 'Logo_ZNES_mitUnisV2.svg'
+        )
     st.image(logo, use_column_width=True)
 
 # %% Main Window
@@ -47,8 +56,10 @@ st.write(
 with st.container(border=True):
     st.page_link(
         "pages/00_Energiesystem.py", label="**Energiesystem konfigurieren**",
-        icon="📊", use_container_width=True,
+        icon="📝", use_container_width=True,
         )
+
+#👨‍💻📝📊
 
 st.write(
     """
