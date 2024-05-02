@@ -313,6 +313,17 @@ with tab3:
         key='heat_revenue'
         )
 
+    # heat_load noch zu solar_heat_flow!
+    if 'Solarthermie' in units:
+        col_vis.subheader('Solathermie')
+        col_vis.altair_chart(
+            alt.Chart(heat_load).mark_line(color='#EC6707').encode(
+                y=alt.Y('heat_demand', title='Spezifische Einstrahlung in MWh/m²'),
+                x=alt.X('Date', title='Datum')
+            ),
+            use_container_width=True
+        )
+
 # %% MARK: Electricity
 with tab4:
     st.header('Elektrizitätsversorgungsdaten')
