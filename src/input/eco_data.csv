@@ -1,4 +1,4 @@
-Date;El Price;Emissionsfaktor Gesamtmix;Gaspreis;CO2-Preis
+Date;el_spot_price;ef_om;gas_price;co2_price
 2014-01-01 00:00:00;13.15;492.603;28.019;4.97
 2014-01-01 01:00:00;12.09;499.289;28.019;4.97
 2014-01-01 02:00:00;11.7;494.797;28.019;4.97

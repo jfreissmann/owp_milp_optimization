@@ -23,10 +23,10 @@ def read_input_data():
         os.path.join(inputpath, 'eco_data.csv'),
         sep=';', index_col=0, parse_dates=True
         )
-    ss.all_el_prices = ss.eco_data['El Price'].to_frame()
-    ss.all_el_emissions = ss.eco_data['Emissionsfaktor Gesamtmix'].to_frame()
-    ss.all_gas_prices = ss.eco_data['Gaspreis'].to_frame()
-    ss.all_co2_prices = ss.eco_data['CO2-Preis'].to_frame()
+    ss.all_el_prices = ss.eco_data['el_spot_price'].to_frame()
+    ss.all_el_emissions = ss.eco_data['ef_om'].to_frame()
+    ss.all_gas_prices = ss.eco_data['gas_price'].to_frame()
+    ss.all_co2_prices = ss.eco_data['co2_price'].to_frame()
 
 # %% MARK: Parameters
 shortnames = {
@@ -264,13 +264,13 @@ with tab3:
     col_vis.subheader('Wärmelastdaten')
 
     if user_file is not None or dataset_name != 'Eigene Daten':
-        heat_load.rename(columns={heat_load.columns[0]: 'heat_load'}, inplace=True)
+        heat_load.rename(columns={heat_load.columns[0]: 'heat_demand'}, inplace=True)
         heat_load.index.names = ['Date']
         heat_load.reset_index(inplace=True)
 
         col_vis.altair_chart(
             alt.Chart(heat_load).mark_line(color='#EC6707').encode(
-                y=alt.Y('heat_load', title='Stündliche Wärmelast in MWh'),
+                y=alt.Y('heat_demand', title='Stündliche Wärmelast in MWh'),
                 x=alt.X('Date', title='Datum')
             ),
             use_container_width=True
@@ -357,7 +357,7 @@ with tab4:
     col_vis_el.altair_chart(
         alt.Chart(el_prices).mark_line(color='#00395B').encode(
             y=alt.Y(
-                'El Price', title='Day-Ahead Spotmarkt Strompreise in €/MWh'
+                'el_spot_price', title='Day-Ahead Spotmarkt Strompreise in €/MWh'
                 ),
             x=alt.X('Date', title='Datum')
             ),
@@ -369,7 +369,7 @@ with tab4:
     col_vis_el.altair_chart(
         alt.Chart(el_em).mark_line(color='#74ADC0').encode(
             y=alt.Y(
-                'Emissionsfaktor Gesamtmix',
+                'ef_om',
                 title='Emissionsfaktor des Gesamtmix kg/MWh'
                 ),
             x=alt.X('Date', title='Datum')
@@ -434,7 +434,7 @@ with tab5:
     col_vis_gas.altair_chart(
         alt.Chart(gas_prices).mark_line(color='#B54036').encode(
             y=alt.Y(
-                'Gaspreis', title='Gaspreise in €/MWh'
+                'gas_price', title='Gaspreise in €/MWh'
                 ),
             x=alt.X('Date', title='Datum')
             ),
@@ -449,12 +449,12 @@ with tab5:
     ss.param_opt['ef_gas'] *= 1e-3
 
     col_vis_gas.subheader('CO₂-Preise')
-    co2_prices['CO2-Preis'] *= ss.param_opt['ef_gas']
+    co2_prices['co2_price'] *= ss.param_opt['ef_gas']
     co2_prices.reset_index(inplace=True)
     col_vis_gas.altair_chart(
         alt.Chart(co2_prices).mark_line(color='#74ADC0').encode(
             y=alt.Y(
-                'CO2-Preis',
+                'co2_price',
                 title='CO₂-Preise in €/MWh'
                 ),
             x=alt.X('Date', title='Datum')
@@ -464,8 +464,8 @@ with tab5:
 
 # %% MARK: Aggregate Data
 ss.data = pd.concat(
-    [heat_load, el_prices['El Price'], el_em['Emissionsfaktor Gesamtmix'],
-     gas_prices['Gaspreis'], co2_prices['CO2-Preis']],
+    [heat_load, el_prices['el_spot_price'], el_em['ef_om'],
+     gas_prices['gas_price'], co2_prices['co2_price']],
     axis=1
     )
 ss.data.set_index('Date', inplace=True, drop=True)
