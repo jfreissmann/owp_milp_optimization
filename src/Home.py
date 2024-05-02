@@ -44,10 +44,11 @@ st.write(
     """
     )
 
-st.page_link(
-    "pages/00_Energiesystem.py", label="Energiesystem konfigurieren",
-    icon="🔬", use_container_width=True,
-    )
+with st.container(border=True):
+    st.page_link(
+        "pages/00_Energiesystem.py", label="**Energiesystem konfigurieren**",
+        icon="📊", use_container_width=True,
+        )
 
 st.write(
     """
