@@ -13,7 +13,7 @@ Developed as part of the project "Offene Wärmespeicherplanung (OWP)" as part of
 
 ## Funding
 
-[![Funding](src\img\Logos_Förderer.png)](https://www.innovation-strukturwandel.de/strukturwandel/de/innovation-strukturwandel/t_raum/t_raum_node.html)
+[<img src="src\img\Logos_Förderer.png">](https://www.innovation-strukturwandel.de/strukturwandel/de/innovation-strukturwandel/t_raum/t_raum_node.html)
 
 ## Installation
 
