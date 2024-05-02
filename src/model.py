@@ -228,11 +228,19 @@ class EnergySystem():
 
             self.es.add(self.comps['chp_internal'])
 
+    def solve_model(self):
+        self.model = solph.Model(self.es)
+        self.model.solve(
+            solver='gurobi', solve_kwargs={'tee': True},
+            cmdline_options={'MIPGap': self.param_opt['MIPGap']}
+            )
+
     def run_model(self):
         self.generate_buses()
         self.generate_sources()
         self.generate_sinks()
         self.generate_components()
+        self.solve_model()
 
 
 def calc_bwsf(i, n):
