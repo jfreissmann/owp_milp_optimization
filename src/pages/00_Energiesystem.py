@@ -27,6 +27,7 @@ def read_input_data():
     ss.all_el_emissions = ss.eco_data['ef_om'].to_frame()
     ss.all_gas_prices = ss.eco_data['gas_price'].to_frame()
     ss.all_co2_prices = ss.eco_data['co2_price'].to_frame()
+    ss.all_solar_heat_flow = ss.eco_data['solar_heat_flow'].to_frame()
 
 # %% MARK: Parameters
 shortnames = {
@@ -313,16 +314,25 @@ with tab3:
         key='heat_revenue'
         )
 
-    # heat_load noch zu solar_heat_flow!
     if 'Solarthermie' in units:
+        solar_heat_flow = ss.all_solar_heat_flow[
+            ss.all_solar_heat_flow.index.year == heat_load_year
+            ].copy()
+        if precise_dates:
+            solar_heat_flow = solar_heat_flow.loc[dates[0]:dates[1], :]
+        solar_heat_flow.reset_index(inplace=True)
+        solar_heat_flow['solar_heat_flow'] *= 1e6
+
         col_vis.subheader('Solathermie')
         col_vis.altair_chart(
-            alt.Chart(heat_load).mark_line(color='#EC6707').encode(
-                y=alt.Y('heat_demand', title='Spezifische Einstrahlung in MWh/m²'),
+            alt.Chart(solar_heat_flow).mark_line(color='#EC6707').encode(
+                y=alt.Y('solar_heat_flow',
+                        title='Spezifische Einstrahlung in Wh/m²'),
                 x=alt.X('Date', title='Datum')
             ),
             use_container_width=True
         )
+        solar_heat_flow['solar_heat_flow'] *= 1e-6
 
 # %% MARK: Electricity
 with tab4:
@@ -506,7 +516,7 @@ with tab5:
 # %% MARK: Aggregate Data
 ss.data = pd.concat(
     [heat_load, el_prices['el_spot_price'], el_em['ef_om'],
-     gas_prices['gas_price'], co2_prices['co2_price']],
-    axis=1
+     gas_prices['gas_price'], co2_prices['co2_price'],
+     solar_heat_flow['solar_heat_flow']], axis=1
     )
 ss.data.set_index('Date', inplace=True, drop=True)
