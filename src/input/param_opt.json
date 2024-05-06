@@ -1,5 +1,6 @@
 {
     "MIPGap": 0.02,
+    "TimeLimit": 600,
     "ef_gas": 0.2012,
     "elec_consumer_charges_grid": 52.52,
     "elec_consumer_charges_self": 20.50,

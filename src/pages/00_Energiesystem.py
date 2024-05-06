@@ -11,7 +11,7 @@ from streamlit import session_state as ss
 # %% MARK: Read Input Data
 @st.cache_data
 def read_input_data():
-    """Read in input data all at once."""
+    '''Read in input data all at once.'''
     inputpath = os.path.abspath(os.path.join(
         os.path.dirname(__file__), '..', 'input'
         ))
@@ -92,7 +92,7 @@ with st.sidebar:
         )
     st.image(logo, use_column_width=True)
 
-    st.markdown("""---""")
+    st.markdown('''---''')
 
     st.subheader('Assoziierte Projektpartner')
     logo_bo = os.path.join(
@@ -110,8 +110,8 @@ with st.sidebar:
         )
     st.image(logo_sw, use_column_width=True)
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(
-    ['System', 'Anlagen', 'Wärme', 'Elektrizität', 'Gas']
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
+    ['System', 'Anlagen', 'Wärme', 'Elektrizität', 'Gas', 'Optimierung']
     )
 
 # %% MARK: Energy System
@@ -295,7 +295,9 @@ with tab3:
     col_vis.subheader('Wärmelastdaten')
 
     if user_file is not None or dataset_name != 'Eigene Daten':
-        heat_load.rename(columns={heat_load.columns[0]: 'heat_demand'}, inplace=True)
+        heat_load.rename(
+            columns={heat_load.columns[0]: 'heat_demand'}, inplace=True
+            )
         heat_load.index.names = ['Date']
         heat_load.reset_index(inplace=True)
 
@@ -468,6 +470,7 @@ with tab5:
             datetime(year=d.year, month=d.month, day=d.day) for d in gas_dates
             ]
         gas_prices = gas_prices.loc[gas_dates[0]:gas_dates[1], :]
+        co2_prices = co2_prices.loc[gas_dates[0]:gas_dates[1], :]
 
     if any(heat_load):
         nr_steps_hl = len(heat_load.index)
@@ -516,7 +519,101 @@ with tab5:
 # %% MARK: Aggregate Data
 ss.data = pd.concat(
     [heat_load, el_prices['el_spot_price'], el_em['ef_om'],
-     gas_prices['gas_price'], co2_prices['co2_price'],
-     solar_heat_flow['solar_heat_flow']], axis=1
+     gas_prices['gas_price'], co2_prices['co2_price']], axis=1
     )
+if 'Solarthermie' in units:
+    ss.data['solar_heat_flow'] = solar_heat_flow['solar_heat_flow']
 ss.data.set_index('Date', inplace=True, drop=True)
+
+# %% MARK: Sonstiges
+with tab6:
+    st.header('Sonstgie Paramter')
+
+    col_econ, col_opt = st.columns([1, 1], gap='large')
+
+    col_econ.subheader('Wirtschaft')
+    ss.param_opt['capital_interest'] *= 100
+    ss.param_opt['capital_interest'] = col_econ.number_input(
+        'Kapitalzins in %', value=ss.param_opt['capital_interest'],
+        key='capital_interest'
+        )
+    ss.param_opt['capital_interest'] *= 1/100
+
+    ss.param_opt['lifetime'] = col_econ.number_input(
+        'Lebensdauer in Jahre', value=ss.param_opt['lifetime'],
+        key='lifetime'
+        )
+
+    help_tax =(
+        'Beim Einsatz von Kraft- und Brennstoffen fällt die sogenannte '
+        + 'Energiesteuer an, was für die Nutzung von gasbefeuerten KWK-Anlangen '
+        + 'und Spitzenlastkesseln relevant ist '
+        + '[[Zoll (2021)](https://www.zoll.de/DE/Fachthemen/Steuern/Verbrauchsteuern/Energie/Steuerbeguenstigung/Steuerentlastung/KWK-Anlagen/Vollstaendige-Steuerentlastung/Steuerentlastungstatbestand/steuerentlastungstatbestand_node.html)].'
+    )
+    ss.param_opt['energy_tax'] = col_econ.number_input(
+        'Energiesteuer in €/Jahr', value=ss.param_opt['energy_tax'],
+        help=help_tax, key='energy_tax'
+        )
+
+    ss.param_opt['vNNE'] = col_econ.number_input(
+        'Vermiedene Netznutzungsentgelte in €/Jahr', value=ss.param_opt['vNNE'],
+        key='vNNE'
+        )
+
+    help_mip = (
+        'Der MIPGap-Parameter steuert die minimale Qualität der '
+        + 'zurückgegebenen Lösung. Er ist eine Obergrenze für die tatsächliche '
+        + 'Lücke der endgültigen Lösung.'
+    )
+    col_opt.subheader('Optimierung')
+
+    ss.param_opt['MIPGap'] *= 100
+    ss.param_opt['MIPGap'] = col_opt.number_input(
+        'MIP Gap in %', value=ss.param_opt['MIPGap'], help=help_mip,
+        key='MIPGap'
+        )
+    ss.param_opt['MIPGap'] *= 1/100
+
+    ss.param_opt['TimeLimit'] = False
+    timelimit = col_opt.toggle(
+        'Simulationsdauer begrenzen', key='ToggleTimeLimit'
+        )
+    if timelimit:
+        ss.param_opt['TimeLimit'] = col_opt.number_input(
+            'Zeitlimit in Minuten', value=ss.param_opt['TimeLimit'],
+            key='TimeLimit'
+            )
+        ss.param_opt['TimeLimit'] *= 60
+
+    st.markdown('''---''')
+
+# %% MARK: Save Data & Link Page
+    savepath = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), '..', 'save')
+        )
+
+    download = False
+    download = st.button(
+        label='💾 Input Daten speichern',
+        key='download_button'
+        )
+    
+    if download:
+        tspath = os.path.join(savepath, 'data_input.csv')
+        ss.data.to_csv(tspath, sep=';')
+
+        optpath = os.path.join(savepath, 'param_opt.json')
+        with open(optpath, 'w', encoding='utf-8') as file:
+            json.dump(ss.param_opt, file, indent=4, sort_keys=True)
+
+        unitpath = os.path.join(savepath, 'param_units.json')
+        with open(unitpath, 'w', encoding='utf-8') as file:
+            json.dump(ss.param_units, file, indent=4, sort_keys=True)
+
+    with st.container(border=True):
+        st.page_link(
+            'pages/01_Simulationsergebnisse.py',
+            label='**Optimierung starten**',
+            icon='📊', use_container_width=True,
+            )
+

@@ -59,8 +59,6 @@ with st.container(border=True):
         icon="📝", use_container_width=True,
         )
 
-#👨‍💻📝📊
-
 st.write(
     """
     ### Assoziierte Projektpartner
