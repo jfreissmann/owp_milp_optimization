@@ -110,8 +110,8 @@ with st.sidebar:
         )
     st.image(logo_sw, use_column_width=True)
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(
-    ['System', 'Anlagen', 'Wärme', 'Elektrizität', 'Gas']
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
+    ['System', 'Anlagen', 'Wärme', 'Elektrizität', 'Gas', 'Optimierung']
     )
 
 # %% MARK: Energy System
@@ -295,7 +295,9 @@ with tab3:
     col_vis.subheader('Wärmelastdaten')
 
     if user_file is not None or dataset_name != 'Eigene Daten':
-        heat_load.rename(columns={heat_load.columns[0]: 'heat_demand'}, inplace=True)
+        heat_load.rename(
+            columns={heat_load.columns[0]: 'heat_demand'}, inplace=True
+            )
         heat_load.index.names = ['Date']
         heat_load.reset_index(inplace=True)
 
@@ -468,6 +470,7 @@ with tab5:
             datetime(year=d.year, month=d.month, day=d.day) for d in gas_dates
             ]
         gas_prices = gas_prices.loc[gas_dates[0]:gas_dates[1], :]
+        co2_prices = co2_prices.loc[gas_dates[0]:gas_dates[1], :]
 
     if any(heat_load):
         nr_steps_hl = len(heat_load.index)
@@ -513,10 +516,34 @@ with tab5:
         use_container_width=True
         )
 
+# %% MARK: Optimierung
+with tab6:
+    st.header('Optimierung')
+
+    col_econ, col_opt = st.columns([1, 1], gap='large')
+
+    col_econ.subheader('Wirtschaft')
+    ss.param_opt['capital_interest'] *= 100
+    ss.param_opt['capital_interest'] = col_econ.number_input(
+        'Kapitalzins in %', value=ss.param_opt['capital_interest'],
+        key='capital_interest'
+        )
+    ss.param_opt['capital_interest'] *= 1/100
+
+    ss.param_opt['lifetime'] = col_econ.number_input(
+        'Lebensdauer in %', value=ss.param_opt['lifetime'],
+        key='lifetime'
+        )
+    col_opt.subheader('Optimierung')
+
 # %% MARK: Aggregate Data
 ss.data = pd.concat(
     [heat_load, el_prices['el_spot_price'], el_em['ef_om'],
-     gas_prices['gas_price'], co2_prices['co2_price'],
-     solar_heat_flow['solar_heat_flow']], axis=1
+     gas_prices['gas_price'], co2_prices['co2_price']], axis=1
     )
+if 'Solarthermie' in units:
+    ss.data['solar_heat_flow'] = solar_heat_flow['solar_heat_flow']
 ss.data.set_index('Date', inplace=True, drop=True)
+
+print(solar_heat_flow)
+print(ss.data)
