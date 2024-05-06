@@ -237,17 +237,17 @@ class EnergySystem():
             )
 
     def get_results(self):
-        results = solph.processing.results(self.model)
-        meta_results = solph.processing.meta_results(self.model)
+        self.results = solph.processing.results(self.model)
+        self.meta_results = solph.processing.meta_results(self.model)
 
-        data_gnw = views.node(results, 'gas network')['sequences']
-        data_enw = views.node(results, 'electricity network')['sequences']
-        data_hnw = views.node(results, 'heat network')['sequences']
-        data_chpnode = views.node(results, 'chp node')['sequences']
-        data_tes = views.node(results, 'tes')['sequences']
+        data_gnw = views.node(self.results, 'gas network')['sequences']
+        data_enw = views.node(self.results, 'electricity network')['sequences']
+        data_hnw = views.node(self.results, 'heat network')['sequences']
+        data_chpnode = views.node(self.results, 'chp node')['sequences']
+        data_tes = views.node(self.results, 'tes')['sequences']
 
-        data_hnw_caps = views.node(results, 'heat network')['scalars']
-        data_tes_cap = views.node(results, 'tes')['scalars'][
+        data_hnw_caps = views.node(self.results, 'heat network')['scalars']
+        data_tes_cap = views.node(self.results, 'tes')['scalars'][
             (('tes', 'None'), 'invest')
             ]
 
@@ -257,7 +257,9 @@ class EnergySystem():
             axis=1
             )
         result_labeling(self.data_all)
-        self.data_all = self.data_all.loc[:, ~self.data_all.columns.duplicated()].copy()
+        self.data_all = self.data_all.loc[
+            :, ~self.data_all.columns.duplicated()
+            ].copy()
 
         self.data_caps = data_hnw_caps
         self.data_caps['cap_tes'] = data_tes_cap
@@ -274,12 +276,16 @@ class EnergySystem():
                 self.data_caps.drop(columns=col, inplace=True)
 
         try:
-            self.data_all = self.data_all.reindex(sorted(self.data_all.columns), axis=1)
+            self.data_all = self.data_all.reindex(
+                sorted(self.data_all.columns), axis=1
+                )
         except TypeError as e:
             print(f'TypeError in sorting data_all: {e}')
 
         try:
-            self.data_caps = self.data_caps.reindex(sorted(self.data_caps.columns), axis=1)
+            self.data_caps = self.data_caps.reindex(
+                sorted(self.data_caps.columns), axis=1
+                )
         except TypeError as e:
             print(f'TypeError in sorting data_caps: {e}')
 
@@ -337,7 +343,8 @@ class EnergySystem():
             ).sum()
 
         self.key_params['cost_el'] = (
-            self.key_params['cost_el_grid'] + self.key_params['cost_el_internal']
+            self.key_params['cost_el_grid']
+            + self.key_params['cost_el_internal']
             )
 
         self.key_params['cost_total'] = (
