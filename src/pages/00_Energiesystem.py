@@ -111,7 +111,7 @@ with st.sidebar:
     st.image(logo_sw, use_column_width=True)
 
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
-    ['System', 'Anlagen', 'Wärme', 'Elektrizität', 'Gas', 'Optimierung']
+    ['System', 'Anlagen', 'Wärme', 'Elektrizität', 'Gas', 'Sonstiges']
     )
 
 # %% MARK: Energy System
@@ -516,9 +516,9 @@ with tab5:
         use_container_width=True
         )
 
-# %% MARK: Optimierung
+# %% MARK: Sonstiges
 with tab6:
-    st.header('Optimierung')
+    st.header('Sonstgie Paramter')
 
     col_econ, col_opt = st.columns([1, 1], gap='large')
 
@@ -531,9 +531,26 @@ with tab6:
     ss.param_opt['capital_interest'] *= 1/100
 
     ss.param_opt['lifetime'] = col_econ.number_input(
-        'Lebensdauer in %', value=ss.param_opt['lifetime'],
+        'Lebensdauer in Jahre', value=ss.param_opt['lifetime'],
         key='lifetime'
         )
+
+    help_tax =(
+        'Beim Einsatz von Kraft- und Brennstoffen fällt die sogenannte '
+        + 'Energiesteuer an, was für die Nutzung von gasbefeuerten KWK-Anlangen '
+        + 'und Spitzenlastkesseln relevant ist '
+        + '[[Zoll (2021)](https://www.zoll.de/DE/Fachthemen/Steuern/Verbrauchsteuern/Energie/Steuerbeguenstigung/Steuerentlastung/KWK-Anlagen/Vollstaendige-Steuerentlastung/Steuerentlastungstatbestand/steuerentlastungstatbestand_node.html)].'
+    )
+    ss.param_opt['energy_tax'] = col_econ.number_input(
+        'Energiesteuer in €/Jahr', value=ss.param_opt['energy_tax'],
+        help=help_tax, key='energy_tax'
+        )
+
+    ss.param_opt['vNNE'] = col_econ.number_input(
+        'Vermiedene Netznutzungsentgelte in €/Jahr', value=ss.param_opt['vNNE'],
+        key='vNNE'
+        )
+
     col_opt.subheader('Optimierung')
 
 # %% MARK: Aggregate Data
@@ -545,5 +562,3 @@ if 'Solarthermie' in units:
     ss.data['solar_heat_flow'] = solar_heat_flow['solar_heat_flow']
 ss.data.set_index('Date', inplace=True, drop=True)
 
-print(solar_heat_flow)
-print(ss.data)
