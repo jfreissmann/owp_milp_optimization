@@ -592,6 +592,9 @@ with tab6:
         os.path.join(os.path.dirname(__file__), '..', 'save')
         )
 
+    if not os.path.exists(savepath):
+        os.mkdir(savepath)
+
     download = False
     download = st.button(
         label='💾 Input Daten speichern',
