@@ -1,5 +1,6 @@
 import oemof.solph as solph
 import pandas as pd
+from oemof.solph import views
 
 
 class EnergySystem():
@@ -235,6 +236,157 @@ class EnergySystem():
             cmdline_options={'MIPGap': self.param_opt['MIPGap']}
             )
 
+    def get_results(self):
+        results = solph.processing.results(self.model)
+        meta_results = solph.processing.meta_results(self.model)
+
+        data_gnw = views.node(results, 'gas network')['sequences']
+        data_enw = views.node(results, 'electricity network')['sequences']
+        data_hnw = views.node(results, 'heat network')['sequences']
+        data_chpnode = views.node(results, 'chp node')['sequences']
+        data_tes = views.node(results, 'tes')['sequences']
+
+        data_hnw_caps = views.node(results, 'heat network')['scalars']
+        data_tes_cap = views.node(results, 'tes')['scalars'][
+            (('tes', 'None'), 'invest')
+            ]
+
+        # Combine all data and relabel the column names
+        self.data_all = pd.concat(
+            [data_gnw, data_enw, data_hnw, data_chpnode, data_tes],
+            axis=1
+            )
+        result_labeling(self.data_all)
+        self.data_all = self.data_all.loc[:, ~self.data_all.columns.duplicated()].copy()
+
+        self.data_caps = data_hnw_caps
+        self.data_caps['cap_tes'] = data_tes_cap
+        result_labeling(self.data_caps)
+
+        for col in self.data_all.columns:
+            if ('status' in col[-1]) or ('state' in col):
+                self.data_all.drop(columns=col, inplace=True)
+
+        self.data_caps = self.data_caps.to_frame().transpose()
+        self.data_caps.reset_index(inplace=True, drop=True)
+        for col in self.data_caps.columns:
+            if ('total' in str(col)) or ('0' in str(col)):
+                self.data_caps.drop(columns=col, inplace=True)
+
+        try:
+            self.data_all = self.data_all.reindex(sorted(self.data_all.columns), axis=1)
+        except TypeError as e:
+            print(f'TypeError in sorting data_all: {e}')
+
+        try:
+            self.data_caps = self.data_caps.reindex(sorted(self.data_caps.columns), axis=1)
+        except TypeError as e:
+            print(f'TypeError in sorting data_caps: {e}')
+
+        # Prepare economic and ecologic data containers
+        self.cost_df = pd.DataFrame()
+        self.key_params = {}
+
+    def calc_econ_params(self):
+        for unit in self.param_units.keys():
+            unit_E_N = self.data_caps.loc[0, f'cap_{unit}']
+            add_cost = 0
+
+            if unit == 'plb':
+                add_cost = self.param_opt['energy_tax']
+                E_N_label = f'Q_{unit}'
+            elif unit == 'hp':
+                E_N_label = f'Q_{unit}_out'
+            elif unit == 'tes':
+                E_N_label = f'Q_in_{unit}'
+            elif unit in ['ccet', 'ice']:
+                E_N_label = f'P_{unit}'
+                unit_E_N = (
+                    unit_E_N / self.param_units[unit]['eta_th']
+                    * self.param_units[unit]['eta_el']
+                    )
+            self.cost_df = calc_cost(
+                unit, unit_E_N, self.param_units, self.data_all[E_N_label],
+                self.cost_df, add_var_cost=add_cost
+                )
+
+        # %% Primary energy and total cost calculation
+        # total unit costs
+        self.key_params['op_cost_total'] = self.cost_df.loc['op_cost'].sum()
+        self.key_params['invest_total'] = self.cost_df.loc['invest'].sum()
+
+        # total gas costs
+        self.key_params['cost_gas'] = (
+            self.data_all['H_source'] * (
+                self.data['gas_price']
+                + self.data['co2_price'] * self.param_opt['ef_gas']
+                )
+            ).sum()
+
+        # total electricity costs
+        self.key_params['cost_el_grid'] = (
+            self.data_all['P_source'] * (
+                self.data['el_spot_price']
+                + self.param_opt['elec_consumer_charges_grid']
+                )
+            ).sum()
+
+        self.key_params['cost_el_internal'] = (
+            self.data_all['P_ccet_no_bonus_int']
+            * self.param_opt['elec_consumer_charges_self']
+            ).sum()
+
+        self.key_params['cost_el'] = (
+            self.key_params['cost_el_grid'] + self.key_params['cost_el_internal']
+            )
+
+        self.key_params['cost_total'] = (
+            self.key_params['op_cost_total'] + self.key_params['cost_gas']
+            + self.key_params['cost_el']
+            )
+
+        # %% Revenue calculation
+        self.key_params['revenues_spotmarket'] = (
+            self.data_all['P_spotmarket'] * (
+                self.data['el_spot_price'] + self.param_opt['param']['vNNE']
+                )
+            ).sum()
+
+        self.key_params['revenues_heat'] = (
+            self.data_all['Q_demand'].sum() * self.param_opt['heat_price']
+            )
+
+        self.key_params['revenues_total'] = (
+            self.key_params['revenues_spotmarket']
+            + self.key_params['revenues_heat']
+            )
+
+        # %% Total balance
+        self.key_params['balance_total'] = (
+            self.key_params['revenues_total'] - self.key_params['cost_total']
+            )
+
+        # %% Meta results
+        self.key_params['objective'] = self.meta_results['objective']
+        self.key_params['gap'] = (
+            (self.meta_results['problem']['Lower bound']
+            - self.meta_results['objective'])
+            / self.meta_results['problem']['Lower bound'] * 100
+            )
+
+        # %% Main economic results
+        self.key_params['LCOH'] = LCOH(
+            self.key_params['invest_total'], self.key_params['cost_total'],
+            self.data_all['Q_demand'].sum(),
+            revenue=(
+                self.key_params['revenues_total']
+                - self.key_params['revenues_heat']
+                ),
+            i=self.param_opt['capital_interest'], n=self.param_opt['lifetime']
+            )
+
+        self.key_params['total_heat_demand'] = self.data_all['Q_demand'].sum()
+
     def run_model(self):
         self.generate_buses()
         self.generate_sources()
@@ -242,6 +394,9 @@ class EnergySystem():
         self.generate_components()
         self.solve_model()
 
+    def run_postprocessing(self):
+        self.get_results()
+        self.calc_econ_params()
 
 def calc_bwsf(i, n):
     """Berechne Barwert Summenfaktor.
@@ -274,3 +429,76 @@ def LCOH(invest, cost, Q, revenue=0, i=0.05, n=20):
 
     LCOH = (invest + bwsf * (cost - revenue))/(bwsf * Q)
     return LCOH
+
+def calc_cost(label, E_N, param, uc, cost_df, add_var_cost=None):
+    """
+    Calculate invest and operational cost for a unit.
+
+    Parameters
+    ----------
+
+    label : str
+        Label of unit to be used as column name in cost DataFrame.
+
+    E_N : float
+        Nominal rated energy that the specific cost relate to.
+
+    param : dict
+        JSON parameter file of user defined constants.
+
+    uc : pandas.DataFrame
+        DataFrame containing the units results of the unit commitment
+        optimization.
+
+    cost_df : pandas.DataFrame
+        DataFrame in which the calculated cost should be inserted.
+    """
+    cost_df.loc['invest', label] =  param[label]['inv_spez'] * E_N
+    cost_df.loc['op_cost_fix', label] = param[label]['op_cost_fix'] * E_N
+    cost_df.loc['op_cost_var', label] = (
+        param[label]['op_cost_var'] * uc.sum()
+        )
+    if add_var_cost:
+        cost_df.loc['op_cost_var', label] += add_var_cost * uc.sum()
+    cost_df.loc['op_cost', label] = (
+        cost_df.loc['op_cost_fix', label] + cost_df.loc['op_cost_var', label]
+        )
+
+    return cost_df
+
+def result_labeling(df, labeldictpath='labeldict.csv'):
+    """
+    Relabel the column names of oemof.solve result dataframes.
+
+    Parameters
+    ----------
+
+    df : pandas.DataFrame
+        DataFrame containing the results whose column names should be relabeled.
+    
+    labeldictpath : str
+        Relative path to the labeldict csv file. Defaults to a path in the same
+        directory.
+    """
+    labeldict_csv = pd.read_csv(labeldictpath, sep=';', na_filter=False)
+
+    labeldict = dict()
+    for idx in labeldict_csv.index:
+        labeldict[
+            ((labeldict_csv.loc[idx, 'name_out'],
+              labeldict_csv.loc[idx, 'name_in']),
+              labeldict_csv.loc[idx, 'type'])
+            ] = labeldict_csv.loc[idx, 'label']
+
+    if isinstance(df, pd.DataFrame):
+        for col in df.columns:
+            if col in labeldict.keys():
+                df.rename(columns={col: labeldict[col]}, inplace=True)
+            else:
+                print(f'Column name "{col}" not in "{labeldictpath}".')
+    elif isinstance(df, pd.Series):
+        for idx in df.index:
+            if idx in labeldict.keys():
+                df.rename(index={idx: labeldict[idx]}, inplace=True)
+            else:
+                print(f'Column name "{idx}" not in "{labeldictpath}".')
