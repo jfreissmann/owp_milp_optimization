@@ -551,7 +551,30 @@ with tab6:
         key='vNNE'
         )
 
+    help_mip = (
+        'Der MIPGap-Parameter steuert die minimale Qualität der '
+        + 'zurückgegebenen Lösung. Er ist eine Obergrenze für die tatsächliche '
+        + 'Lücke der endgültigen Lösung.'
+    )
     col_opt.subheader('Optimierung')
+
+    ss.param_opt['MIPGap'] *= 100
+    ss.param_opt['MIPGap'] = col_opt.number_input(
+        'MIP Gap in %', value=ss.param_opt['MIPGap'], help=help_mip,
+        key='MIPGap'
+        )
+    ss.param_opt['MIPGap'] *= 1/100
+
+    ss.param_opt['TimeLimit'] = False
+    timelimit = col_opt.toggle(
+        'Simulationsdauer begrenzen', key='ToggleTimeLimit'
+        )
+    if timelimit:
+        ss.param_opt['TimeLimit'] = col_opt.number_input(
+            'Zeitlimit in Minuten', value=ss.param_opt['TimeLimit'],
+            key='TimeLimit'
+            )
+        ss.param_opt['TimeLimit'] *= 60
 
 # %% MARK: Aggregate Data
 ss.data = pd.concat(
