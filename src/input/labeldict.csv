@@ -1,0 +1,33 @@
+name_out;name_in;type;label
+gas source;gas network;flow;H_source
+electricity source;electricity network;flow;P_source
+electricity network;spotmarket;flow;P_spotmarket
+heat network;heat demand;flow;Q_demand
+peak load boiler;heat network;flow;Q_plb
+gas network;peak load boiler;flow;H_plb
+peak load boiler;heat network;invest;cap_plb
+ccet;heat network;flow;Q_ccet
+ccet;chp node;flow;P_ccet
+gas network;ccet;flow;H_ccet
+ccet;heat network;invest;cap_ccet
+ice;heat network;flow;Q_ice
+ice;chp node;flow;P_ice
+biogas network;ice;flow;H_ice
+ice;heat network;invest;cap_ice
+hp;heat network;flow;Q_out_hp
+electricity network;hp;flow;P_in_hp
+electricity network;hp;status;state_hp
+hp;heat network;status_nominal;state_nom_hp
+hp;heat network;invest;cap_hp
+tes;heat network;flow;Q_out_tes
+tes;heat network;status;state_out_tes
+tes;heat network;status_nominal;state_nom_out_tes
+tes;heat network;invest;cap_out_tes
+heat network;tes;flow;Q_in_tes
+heat network;tes;status;state_in_tes
+heat network;tes;status_nominal;state_nom_in_tes
+heat network;tes;invest;cap_in_tes
+tes;None;storage_content;storage_content_tes
+tes;None;invest;cap_tes
+solar thermal;heat network;flow;Q_sol
+solar thermal;heat network;invest;cap_sol

@@ -1,3 +1,5 @@
+import os
+
 import oemof.solph as solph
 import pandas as pd
 from oemof.solph import views
@@ -256,14 +258,21 @@ class EnergySystem():
             [data_gnw, data_enw, data_hnw, data_chpnode, data_tes],
             axis=1
             )
-        result_labeling(self.data_all)
+
+        ldpath = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__), 'input', 'labeldict.csv'
+                )
+            )
+
+        result_labeling(self.data_all, labeldictpath=ldpath)
         self.data_all = self.data_all.loc[
             :, ~self.data_all.columns.duplicated()
             ].copy()
 
         self.data_caps = data_hnw_caps
         self.data_caps['cap_tes'] = data_tes_cap
-        result_labeling(self.data_caps)
+        result_labeling(self.data_caps, labeldictpath=ldpath)
 
         for col in self.data_all.columns:
             if ('status' in col[-1]) or ('state' in col):
