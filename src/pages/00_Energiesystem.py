@@ -7,8 +7,6 @@ import pandas as pd
 import streamlit as st
 from streamlit import session_state as ss
 
-from model import EnergySystem
-
 
 # %% MARK: Read Input Data
 @st.cache_data
@@ -31,12 +29,6 @@ def read_input_data():
     ss.all_co2_prices = ss.eco_data['co2_price'].to_frame()
     ss.all_solar_heat_flow = ss.eco_data['solar_heat_flow'].to_frame()
 
-def run_es_model(es):
-    with st.spinner('Optimierung wird durchgeführt...'):
-        es.run_model()
-    with st.spinner('Postprocessing wird durchgeführt...'):
-        es.run_postprocessing()
-        breakpoint()
 
 # %% MARK: Parameters
 shortnames = {
@@ -120,7 +112,7 @@ with st.sidebar:
     st.image(logo_sw, use_column_width=True)
 
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
-    ['System', 'Anlagen', 'Wärme', 'Elektrizität', 'Gas', 'Optimierung']
+    ['System', 'Anlagen', 'Wärme', 'Elektrizität', 'Gas', 'Sonstiges']
     )
 
 # %% MARK: Energy System
@@ -536,7 +528,7 @@ ss.data.set_index('Date', inplace=True, drop=True)
 
 # %% MARK: Sonstiges
 with tab6:
-    st.header('Sonstgie Paramter')
+    st.header('Sonstige Paramter')
 
     col_econ, col_opt = st.columns([1, 1], gap='large')
 
@@ -560,12 +552,12 @@ with tab6:
         + '[[Zoll (2021)](https://www.zoll.de/DE/Fachthemen/Steuern/Verbrauchsteuern/Energie/Steuerbeguenstigung/Steuerentlastung/KWK-Anlagen/Vollstaendige-Steuerentlastung/Steuerentlastungstatbestand/steuerentlastungstatbestand_node.html)].'
     )
     ss.param_opt['energy_tax'] = col_econ.number_input(
-        'Energiesteuer in €/Jahr', value=ss.param_opt['energy_tax'],
+        'Energiesteuer in €/MWh', value=ss.param_opt['energy_tax'],
         help=help_tax, key='energy_tax'
         )
 
     ss.param_opt['vNNE'] = col_econ.number_input(
-        'Vermiedene Netznutzungsentgelte in €/Jahr', value=ss.param_opt['vNNE'],
+        'Vermiedene Netznutzungsentgelte in €/MWh', value=ss.param_opt['vNNE'],
         key='vNNE'
         )
 
@@ -595,32 +587,6 @@ with tab6:
         ss.param_opt['TimeLimit'] *= 60
 
     st.markdown('''---''')
-
-# %% MARK: Save Data & Link Page
-    savepath = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), '..', 'save')
-        )
-
-    if not os.path.exists(savepath):
-        os.mkdir(savepath)
-
-    download = False
-    download = st.button(
-        label='💾 Input Daten speichern',
-        key='download_button'
-        )
-    
-    if download:
-        tspath = os.path.join(savepath, 'data_input.csv')
-        ss.data.to_csv(tspath, sep=';')
-
-        optpath = os.path.join(savepath, 'param_opt.json')
-        with open(optpath, 'w', encoding='utf-8') as file:
-            json.dump(ss.param_opt, file, indent=4, sort_keys=True)
-
-        unitpath = os.path.join(savepath, 'param_units.json')
-        with open(unitpath, 'w', encoding='utf-8') as file:
-            json.dump(ss.param_units, file, indent=4, sort_keys=True)
 
     with st.container(border=True):
         st.page_link(
