@@ -132,8 +132,8 @@ class EnergySystem():
                                 maximum=self.param_units[unit]['cap_max'],
                                 minimum=self.param_units[unit]['cap_min']
                                 ),
-                            max=self.param_units['Q_rel_max'],
-                            min=self.param_units['Q_rel_min'],
+                            max=self.param_units[unit]['Q_rel_max'],
+                            min=self.param_units[unit]['Q_rel_min'],
                             nonconvex=solph.NonConvex()
                             )
                         },
@@ -172,8 +172,8 @@ class EnergySystem():
                                 maximum=self.param_units[unit]['cap_max'],
                                 minimum=self.param_units[unit]['cap_min']
                                 ),
-                            max=self.param_units['Q_rel_max'],
-                            min=self.param_units['Q_rel_min'],
+                            max=self.param_units[unit]['Q_rel_max'],
+                            min=self.param_units[unit]['Q_rel_min'],
                             variable_costs=var_cost
                             )
                         },
@@ -212,14 +212,14 @@ class EnergySystem():
                         ),
                     initial_storage_level=self.param_units[unit]['init_storage'],
                     loss_rate=self.param_units[unit]['Q_rel_loss'],
-                    balanced=self.param_units['balanced']
+                    balanced=self.param_units[unit]['balanced']
                     )
 
                 self.es.add(self.comps[unit])
 
         if internal_el:
             self.comps['chp_internal'] = solph.components.Converter(
-                label='chp_internal',
+                label='chp internal',
                 inputs={self.buses['chp_node']: solph.flows.Flow()},
                 outputs={self.buses['enw']: solph.flows.Flow(
                     nominal_value=9999,
@@ -311,7 +311,7 @@ class EnergySystem():
                 add_cost = self.param_opt['energy_tax']
                 E_N_label = f'Q_{unit}'
             elif unit == 'hp':
-                E_N_label = f'Q_{unit}_out'
+                E_N_label = f'Q_out_{unit}'
             elif unit == 'tes':
                 E_N_label = f'Q_in_{unit}'
             elif unit in ['ccet', 'ice']:
@@ -347,7 +347,7 @@ class EnergySystem():
             ).sum()
 
         self.key_params['cost_el_internal'] = (
-            self.data_all['P_ccet_no_bonus_int']
+            self.data_all['P_internal']
             * self.param_opt['elec_consumer_charges_self']
             ).sum()
 
@@ -364,7 +364,7 @@ class EnergySystem():
         # %% Revenue calculation
         self.key_params['revenues_spotmarket'] = (
             self.data_all['P_spotmarket'] * (
-                self.data['el_spot_price'] + self.param_opt['param']['vNNE']
+                self.data['el_spot_price'] + self.param_opt['vNNE']
                 )
             ).sum()
 
@@ -403,7 +403,7 @@ class EnergySystem():
 
         self.key_params['total_heat_demand'] = self.data_all['Q_demand'].sum()
 
-    def get_ecol_params(self):
+    def calc_ecol_params(self):
         self.data_all['Emissions OM'] = 0
 
         if 'H_source' in self.data_all.columns:

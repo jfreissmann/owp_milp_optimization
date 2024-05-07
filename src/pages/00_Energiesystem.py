@@ -7,6 +7,8 @@ import pandas as pd
 import streamlit as st
 from streamlit import session_state as ss
 
+from model import EnergySystem
+
 
 # %% MARK: Read Input Data
 @st.cache_data
@@ -28,6 +30,13 @@ def read_input_data():
     ss.all_gas_prices = ss.eco_data['gas_price'].to_frame()
     ss.all_co2_prices = ss.eco_data['co2_price'].to_frame()
     ss.all_solar_heat_flow = ss.eco_data['solar_heat_flow'].to_frame()
+
+def run_es_model(es):
+    with st.spinner('Optimierung wird durchgeführt...'):
+        es.run_model()
+    with st.spinner('Postprocessing wird durchgeführt...'):
+        es.run_postprocessing()
+        breakpoint()
 
 # %% MARK: Parameters
 shortnames = {
@@ -614,9 +623,13 @@ with tab6:
             json.dump(ss.param_units, file, indent=4, sort_keys=True)
 
     with st.container(border=True):
-        st.page_link(
-            'pages/01_Simulationsergebnisse.py',
-            label='**Optimierung starten**',
-            icon='📊', use_container_width=True,
-            )
+        if st.button(
+            label='📊**Optimierung starten**',
+            use_container_width=True,
+            ):
+            print(json.dumps(ss.param_units, indent=4, sort_keys=True))
+            ss.energy_system = EnergySystem(
+                ss.data, ss.param_units, ss.param_opt
+                )
+            run_es_model(ss.energy_system)
 

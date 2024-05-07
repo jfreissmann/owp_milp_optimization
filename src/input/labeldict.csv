@@ -1,18 +1,26 @@
 name_out;name_in;type;label
 gas source;gas network;flow;H_source
 electricity source;electricity network;flow;P_source
-electricity network;spotmarket;flow;P_spotmarket
+chp node;spotmarket;flow;P_spotmarket
+chp node;chp internal;flow;P_internal
+chp internal;electricity network;flow;P_internal
 heat network;heat demand;flow;Q_demand
-peak load boiler;heat network;flow;Q_plb
-gas network;peak load boiler;flow;H_plb
-peak load boiler;heat network;invest;cap_plb
+plb;heat network;flow;Q_plb
+plb;heat network;status;state_plb
+plb;heat network;status_nominal;state_nom_plb
+gas network;plb;flow;H_plb
+plb;heat network;invest;cap_plb
 ccet;heat network;flow;Q_ccet
 ccet;chp node;flow;P_ccet
+ccet;heat network;status;state_ccet
+ccet;heat network;status_nominal;state_nom_ccet
 gas network;ccet;flow;H_ccet
 ccet;heat network;invest;cap_ccet
 ice;heat network;flow;Q_ice
 ice;chp node;flow;P_ice
-biogas network;ice;flow;H_ice
+ice;heat network;status;state_ice
+ice;heat network;status_nominal;state_nom_ice
+gas network;ice;flow;H_ice
 ice;heat network;invest;cap_ice
 hp;heat network;flow;Q_out_hp
 electricity network;hp;flow;P_in_hp
