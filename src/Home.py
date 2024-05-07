@@ -55,8 +55,8 @@ st.write(
 
 with st.container(border=True):
     st.page_link(
-        "pages/00_Energiesystem.py", label="**Energiesystem konfigurieren**",
-        icon="📝", use_container_width=True,
+        'pages/00_Energiesystem.py', label='**Energiesystem konfigurieren**',
+        icon='📝', use_container_width=True,
         )
 
 st.write(
@@ -69,7 +69,7 @@ _, col_partner, _ = st.columns([0.1 ,0.8, 0.1])
 logo_partner = os.path.join(__file__, '..', 'img', 'Logos_Partner_transparent.png')
 col_partner.image(logo_partner, use_column_width=True)
 
-st.markdown("""---""")
+st.markdown('''---''')
 
 with st.expander('Verwendete Software'):
     st.info(
