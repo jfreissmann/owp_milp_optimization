@@ -403,6 +403,37 @@ class EnergySystem():
 
         self.key_params['total_heat_demand'] = self.data_all['Q_demand'].sum()
 
+    def get_ecol_params(self):
+        self.data_all['Emissions OM'] = 0
+
+        if 'H_source' in self.data_all.columns:
+            self.data_all['Emissions OM'] += (
+                self.data_all['H_source'] * self.param_opt['ef_gas']
+                )
+            self.key_params['Emissions OM (Gas)'] = (
+                self.data_all['H_source'] * self.param_opt['ef_gas']
+                ).sum()
+
+        if 'P_source' in self.data_all.columns:
+            self.data_all['Emissions OM'] += (
+                self.data_all['P_source'] * self.data['ef_om']
+                )
+            self.key_params['Emissions OM (Electricity)'] = (
+                self.data_all['P_source'] * self.data['ef_om']
+                ).sum()
+
+        if 'P_spotmarket' in self.data_all.columns:
+            self.data_all['Emissions OM'] -= (
+                self.data_all['P_spotmarket'] * self.data['ef_om']
+                )
+            self.key_params['Emissions OM (Spotmarket)'] = (
+                self.data_all['P_spotmarket'] * self.data['ef_om'] * -1
+                ).sum()
+
+        self.key_params['Total Emissions OM'] = (
+            self.data_all['Emissions OM'].sum()
+            )
+
     def run_model(self):
         self.generate_buses()
         self.generate_sources()
@@ -413,6 +444,7 @@ class EnergySystem():
     def run_postprocessing(self):
         self.get_results()
         self.calc_econ_params()
+        self.calc_ecol_params()
 
 def calc_bwsf(i, n):
     """Berechne Barwert Summenfaktor.
