@@ -119,22 +119,24 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
 with tab1:
     st.header('Auswahl des Wärmeversorgungssystem')
 
-    units = st.multiselect(
+    col_vis_unit, col_unit = st.columns([1, 2], gap='large')
+
+    units = col_unit.multiselect(
         'Wähle die Wärmeversorgungsanlagen aus, die im System verwendet werden '
         + 'können.',
         list(shortnames.keys()),
         placeholder='Wärmeversorgungsanlagen'
         )
 
-    col_topo, _ = st.columns([1, 2])
+    # col_topo, _ = st.columns([1, 2])
 
     topopath = os.path.abspath(
         os.path.join(os.path.dirname(__file__), '..', 'img', 'es_topology_')
         )
+    col_vis_unit.image(f'{topopath}header.png', use_column_width=True)
     if units:
-        col_topo.image(f'{topopath}header.png', use_column_width=True)
         for unit in units:
-            col_topo.image(
+            col_vis_unit.image(
                 f'{topopath+shortnames[unit]}.png', use_column_width=True
                 )
 
