@@ -129,7 +129,7 @@ with tab1:
         )
 
     ss.param_units = {
-        u: params for u, params in ss.param_units_all.items() if longnames[u] in units
+        u: params for u, params in ss.param_units_all.items() if longnames[u] in ss.units
         }
 
     topopath = os.path.abspath(
