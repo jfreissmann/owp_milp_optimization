@@ -96,7 +96,20 @@ if download:
 
 with st.container(border=True):
         if st.button(label='📊**Optimierung starten**', use_container_width=True):
-            ss.energy_system = EnergySystem(
-                ss.data, ss.param_units, ss.param_opt
-                )
-            run_es_model(ss.energy_system)
+            with st.spinner('Optimierung wird durchgeführt...'):
+                ss.energy_system = EnergySystem(
+                    ss.data, ss.param_units, ss.param_opt
+                    )
+                st.toast('Energiesystem ist initialisiert')
+                ss.energy_system.generate_buses()
+                ss.energy_system.generate_sources()
+                ss.energy_system.generate_sinks()
+                ss.energy_system.generate_components()
+                st.toast('Modell ist erzeugt')
+                ss.energy_system.solve_model()
+                st.toast('Optimierungsproblem ist gelöst')
+                ss.energy_system.get_results()
+                st.toast('Ergebnisse sind ausgelesen')
+                ss.energy_system.calc_econ_params()
+                ss.energy_system.calc_ecol_params()
+                st.toast('Postprocessing ist durchgeführt')
