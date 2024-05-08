@@ -27,7 +27,7 @@ col_inno, _, col_foerder = st.columns([0.3, 0.4, 0.3])
 logo = os.path.join(__file__, '..', 'img', 'Logo_InnoNord_OWP.png')
 col_inno.image(logo, use_column_width=True)
 
-logo_foederer = os.path.join(__file__, '..', 'img', 'Logos_Förderer.png')
+logo_foederer = os.path.join(__file__, '..', 'img', 'Logos_Förderer_ohnePTJ.png')
 col_foerder.image(logo_foederer, use_column_width=True)
 
 st.write(
