@@ -87,7 +87,6 @@ col_over.subheader('Zeitreihen im Wärmeversorgungssystem')
 
 data_overview = ss.data.describe()
 data_overview.drop(index=['count', 'std', '25%', '75%'], inplace=True)
-data_overview['solar_heat_flow'] *= 1e6
 data_overview.rename(
     index={
         'mean': 'Mittelwert', 'min': 'Minimalwert',
@@ -99,6 +98,13 @@ data_overview.rename(
         'ef_om': 'Emissionsfaktor Strommix (kg/MWh)',
         'gas_price': 'Gaspreis (€/MWh)',
         'co2_price': 'CO₂-Preis (€/MWh)',
+        'solar_heat_flow': 'Spez. solare Einstrahlung (Wh/m²)'
+        }, inplace=True
+    )
+
+if 'Solarthermie' in ss.units:
+    data_overview['solar_heat_flow'] *= 1e6
+    data_overview.rename(columns={
         'solar_heat_flow': 'Spez. solare Einstrahlung (Wh/m²)'
         }, inplace=True
     )
@@ -128,8 +134,6 @@ param_overview.rename(
     )
 col_over.dataframe(param_overview, use_container_width=True)
 
-# col_over.markdown('''---''')
-
 # %% MARK: Save Data
 savepath = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..', 'save')
@@ -157,21 +161,35 @@ if download:
         json.dump(ss.param_units, file, indent=4, sort_keys=True)
 
 with st.container(border=True):
-        if st.button(label='📊**Optimierung starten**', use_container_width=True):
-            with st.spinner('Optimierung wird durchgeführt...'):
-                ss.energy_system = EnergySystem(
-                    ss.data, ss.param_units, ss.param_opt
-                    )
-                st.toast('Energiesystem ist initialisiert')
-                ss.energy_system.generate_buses()
-                ss.energy_system.generate_sources()
-                ss.energy_system.generate_sinks()
-                ss.energy_system.generate_components()
-                st.toast('Modell ist erzeugt')
-                ss.energy_system.solve_model()
-                st.toast('Optimierungsproblem ist gelöst')
-                ss.energy_system.get_results()
-                st.toast('Ergebnisse sind ausgelesen')
-                ss.energy_system.calc_econ_params()
-                ss.energy_system.calc_ecol_params()
-                st.toast('Postprocessing ist durchgeführt')
+    opt = st.button(label='🖥️**Optimierung starten**', use_container_width=True)
+    if opt:
+        with st.spinner('Optimierung wird durchgeführt...'):
+            print(ss.param_units)
+            ss.energy_system = EnergySystem(
+                ss.data, ss.param_units, ss.param_opt
+                )
+            st.toast('Energiesystem ist initialisiert')
+
+            ss.energy_system.generate_buses()
+            ss.energy_system.generate_sources()
+            ss.energy_system.generate_sinks()
+            ss.energy_system.generate_components()
+            st.toast('Modell ist erzeugt')
+
+            ss.energy_system.solve_model()
+            st.toast('Optimierungsproblem ist gelöst')
+
+            ss.energy_system.get_results()
+            st.toast('Ergebnisse sind ausgelesen')
+
+            ss.energy_system.calc_econ_params()
+            ss.energy_system.calc_ecol_params()
+            st.toast('Postprocessing ist durchgeführt')
+
+if opt:
+    with st.container(border=True):
+        st.page_link(
+            'pages/02_Simulationsergebnisse.py',
+            label='**Zu den Ergebnissen**',
+            icon='📊', use_container_width=True
+            )
