@@ -121,7 +121,7 @@ with tab1:
 
     col_vis_unit, col_unit = st.columns([1, 2], gap='large')
 
-    units = col_unit.multiselect(
+    ss.units = col_unit.multiselect(
         'Wähle die Wärmeversorgungsanlagen aus, die im System verwendet werden '
         + 'können.',
         list(shortnames.keys()),
@@ -134,8 +134,8 @@ with tab1:
         os.path.join(os.path.dirname(__file__), '..', 'img', 'es_topology_')
         )
     col_vis_unit.image(f'{topopath}header.png', use_column_width=True)
-    if units:
-        for unit in units:
+    if ss.units:
+        for unit in ss.units:
             col_vis_unit.image(
                 f'{topopath+shortnames[unit]}.png', use_column_width=True
                 )
@@ -144,7 +144,7 @@ with tab1:
 with tab2:
     st.header('Parametrisierung der Wärmeversorgungsanlagen')
 
-    for unit in units:
+    for unit in ss.units:
         params = ss.param_units[shortnames[unit]]
         with st.expander(unit):
             col_tech, col_econ = st.columns(2, gap='large')
@@ -319,7 +319,7 @@ with tab3:
         key='heat_revenue'
         )
 
-    if 'Solarthermie' in units:
+    if 'Solarthermie' in ss.units:
         solar_heat_flow = ss.all_solar_heat_flow[
             ss.all_solar_heat_flow.index.year == heat_load_year
             ].copy()
@@ -524,7 +524,7 @@ ss.data = pd.concat(
     [heat_load, el_prices['el_spot_price'], el_em['ef_om'],
      gas_prices['gas_price'], co2_prices['co2_price']], axis=1
     )
-if 'Solarthermie' in units:
+if 'Solarthermie' in ss.units:
     ss.data['solar_heat_flow'] = solar_heat_flow['solar_heat_flow']
 ss.data.set_index('Date', inplace=True, drop=True)
 
