@@ -18,6 +18,15 @@ def run_es_model(es):
         breakpoint()
 
 
+shortnames = {
+    'Wärmepumpe': 'hp',
+    'Gas- und Dampfkratwerk': 'ccet',
+    'Blockheizkraftwerk': 'ice',
+    'Solarthermie': 'sol',
+    'Spitzenlastkessel': 'plb',
+    'Wärmespeicher': 'tes'
+}
+
 # %% MARK: Sidebar
 with st.sidebar:
     st.subheader('Offene Wärmespeicherplanung')
@@ -58,15 +67,68 @@ with st.sidebar:
 
 # %% Overview
 
-st.header('Überblick')
+st.header('Zusammenfassung')
 
-col_es, col_over = st.columns([1, 1], gap='large')
+col_es, col_over = st.columns([1, 4], gap='large')
 
 col_es.subheader('Energiesystem')
 
-col_over.subheader('Überblick')
+topopath = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..', 'img', 'es_topology_')
+    )
 
-st.markdown('''---''')
+col_es.image(f'{topopath}header.png', use_column_width=True)
+for unit in ss.units:
+    col_es.image(
+        f'{topopath+shortnames[unit]}.png', use_column_width=True
+        )
+
+col_over.subheader('Zeitreihen im Wärmeversorgungssystem')
+
+data_overview = ss.data.describe()
+data_overview.drop(index=['count', 'std', '25%', '75%'], inplace=True)
+data_overview['solar_heat_flow'] *= 1e6
+data_overview.rename(
+    index={
+        'mean': 'Mittelwert', 'min': 'Minimalwert',
+        '50%': 'Median', 'max': 'Maximalwert'
+        },
+    columns={
+        'heat_demand': 'Wärmelast (MWh)',
+        'el_spot_price': 'Spotmarkt Strompreis (€/MWh)',
+        'ef_om': 'Emissionsfaktor Strommix (kg/MWh)',
+        'gas_price': 'Gaspreis (€/MWh)',
+        'co2_price': 'CO₂-Preis (€/MWh)',
+        'solar_heat_flow': 'Spez. solare Einstrahlung (Wh/m²)'
+        }, inplace=True
+    )
+
+col_over.dataframe(data_overview.T, use_container_width=True)
+
+col_over.subheader('Parameter im Wärmeversorgungssystem')
+
+param_overview = pd.DataFrame.from_dict(
+    ss.param_opt, orient='index', columns=['Wert']
+    )
+param_overview.drop(
+    index=['MIPGap', 'TimeLimit', 'heat_price', 'TEHG_bonus'], inplace=True
+    )
+param_overview.loc['ef_gas'] *= 1000
+param_overview.loc['capital_interest'] *= 100
+param_overview.rename(
+    index={
+        'ef_gas': 'Emissionsfaktor Gas (kg/MWh)',
+        'elec_consumer_charges_grid': 'Strompreisbestandteile (Netz) (€/MWh)',
+        'elec_consumer_charges_self': 'Strompreisbestandteile (Eigenbedarf) (€/MWh)',
+        'energy_tax': 'Energiesteuer (€/MWh)',
+        'vNNE': 'Vermiedene Netznutzungsentgelte (€/MWh)',
+        'capital_interest': 'Kapitalzins (%)',
+        'lifetime': 'Lebensdauer (a)'
+        }, inplace=True
+    )
+col_over.dataframe(param_overview, use_container_width=True)
+
+# col_over.markdown('''---''')
 
 # %% MARK: Save Data
 savepath = os.path.abspath(
@@ -77,7 +139,7 @@ if not os.path.exists(savepath):
     os.mkdir(savepath)
 
 download = False
-download = st.button(
+download = col_over.button(
     label='💾 Input Daten speichern',
     key='download_button'
     )
