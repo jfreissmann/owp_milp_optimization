@@ -54,7 +54,7 @@ unitpath = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..', 'input', 'param_units.json')
     )
 with open(unitpath, 'r', encoding='utf-8') as file:
-    ss.param_units = json.load(file)
+    ss.param_units_all = json.load(file)
 
 optpath = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..', 'input', 'param_opt.json')
@@ -128,7 +128,9 @@ with tab1:
         placeholder='Wärmeversorgungsanlagen'
         )
 
-    # col_topo, _ = st.columns([1, 2])
+    ss.param_units = {
+        u: params for u, params in ss.param_units_all.items() if longnames[u] in units
+        }
 
     topopath = os.path.abspath(
         os.path.join(os.path.dirname(__file__), '..', 'img', 'es_topology_')
@@ -145,7 +147,6 @@ with tab2:
     st.header('Parametrisierung der Wärmeversorgungsanlagen')
 
     for unit in units:
-        params = ss.param_units[shortnames[unit]]
         with st.expander(unit):
             col_tech, col_econ = st.columns(2, gap='large')
 
