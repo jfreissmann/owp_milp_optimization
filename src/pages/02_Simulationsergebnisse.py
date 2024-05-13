@@ -1,5 +1,4 @@
 import datetime as dt
-import json
 import os
 
 import altair as alt
@@ -34,11 +33,6 @@ with st.sidebar:
         os.path.dirname(__file__), '..', 'img', 'Logo_InnoNord_OWP.png'
         )
     st.image(logo_inno, use_column_width=True)
-
-    # logo_foeder = os.path.join(
-    #     os.path.dirname(__file__), '..', 'img', 'Logos_Förderer.png'
-    #     )
-    # st.image(logo_foeder, use_column_width=True)
 
     logo = os.path.join(
         os.path.dirname(__file__), '..', 'img', 'Logo_ZNES_mitUnisV2.svg'
@@ -129,6 +123,7 @@ if tes_used:
         dates = [
             dt.datetime(year=d.year, month=d.month, day=d.day) for d in dates
             ]
+        # Avoid error while only one date is picked
         if len(dates) == 1:
             dates.append(dates[0] + dt.timedelta(days=1))
 

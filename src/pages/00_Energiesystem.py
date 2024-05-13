@@ -1,6 +1,6 @@
+import datetime as dt
 import json
 import os
-from datetime import date, datetime, time, timedelta
 
 import altair as alt
 import pandas as pd
@@ -82,11 +82,6 @@ with st.sidebar:
         os.path.dirname(__file__), '..', 'img', 'Logo_InnoNord_OWP.png'
         )
     st.image(logo_inno, use_column_width=True)
-
-    # logo_foeder = os.path.join(
-    #     os.path.dirname(__file__), '..', 'img', 'Logos_Förderer.png'
-    #     )
-    # st.image(logo_foeder, use_column_width=True)
 
     logo = os.path.join(
         os.path.dirname(__file__), '..', 'img', 'Logo_ZNES_mitUnisV2.svg'
@@ -256,15 +251,15 @@ with tab3:
             dates = col_sel.date_input(
                 'Zeitraum auswählen:',
                 value=(
-                    date(int(heat_load_year), 3, 28),
-                    date(int(heat_load_year), 7, 2)
+                    dt.date(int(heat_load_year), 3, 28),
+                    dt.date(int(heat_load_year), 7, 2)
                     ),
-                min_value=date(int(heat_load_year), 1, 1),
-                max_value=date(int(heat_load_year), 12, 31),
+                min_value=dt.date(int(heat_load_year), 1, 1),
+                max_value=dt.date(int(heat_load_year), 12, 31),
                 format='DD.MM.YYYY', key='date_picker_heat_load'
                 )
             dates = [
-                datetime(year=d.year, month=d.month, day=d.day) for d in dates
+                dt.datetime(year=d.year, month=d.month, day=d.day) for d in dates
                 ]
             heat_load = heat_load.loc[dates[0]:dates[1], :]
 
@@ -370,15 +365,15 @@ with tab4:
         el_dates = col_elp.date_input(
             'Zeitraum auswählen:',
             value=dates if dates is not None else (
-                date(int(heat_load_year), 3, 28),
-                date(int(heat_load_year), 7, 2)
+                dt.date(int(heat_load_year), 3, 28),
+                dt.date(int(heat_load_year), 7, 2)
                 ),
-            min_value=date(int(heat_load_year), 1, 1),
-            max_value=date(int(heat_load_year), 12, 31),
+            min_value=dt.date(int(heat_load_year), 1, 1),
+            max_value=dt.date(int(heat_load_year), 12, 31),
             format='DD.MM.YYYY', key='date_picker_el_prices'
             )
         el_dates = [
-            datetime(year=d.year, month=d.month, day=d.day) for d in el_dates
+            dt.datetime(year=d.year, month=d.month, day=d.day) for d in el_dates
             ]
         el_prices = el_prices.loc[el_dates[0]:el_dates[1], :]
         el_em = el_em.loc[el_dates[0]:el_dates[1], :]
@@ -464,15 +459,15 @@ with tab5:
         gas_dates = col_gas.date_input(
             'Zeitraum auswählen:',
             value=dates if dates is not None else (
-                date(int(heat_load_year), 3, 28),
-                date(int(heat_load_year), 7, 2)
+                dt.date(int(heat_load_year), 3, 28),
+                dt.date(int(heat_load_year), 7, 2)
                 ),
-            min_value=date(int(heat_load_year), 1, 1),
-            max_value=date(int(heat_load_year), 12, 31),
+            min_value=dt.date(int(heat_load_year), 1, 1),
+            max_value=dt.date(int(heat_load_year), 12, 31),
             format='DD.MM.YYYY', key='date_picker_gas_prices'
             )
         gas_dates = [
-            datetime(year=d.year, month=d.month, day=d.day) for d in gas_dates
+            dt.datetime(year=d.year, month=d.month, day=d.day) for d in gas_dates
             ]
         gas_prices = gas_prices.loc[gas_dates[0]:gas_dates[1], :]
         co2_prices = co2_prices.loc[gas_dates[0]:gas_dates[1], :]

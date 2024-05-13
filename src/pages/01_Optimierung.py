@@ -1,22 +1,11 @@
 import json
 import os
-from datetime import date, datetime, time, timedelta
 
-import altair as alt
 import pandas as pd
 import streamlit as st
 from streamlit import session_state as ss
 
 from model import EnergySystem
-
-
-def run_es_model(es):
-    with st.spinner('Optimierung wird durchgeführt...'):
-        es.run_model()
-    with st.spinner('Postprocessing wird durchgeführt...'):
-        es.run_postprocessing()
-        breakpoint()
-
 
 shortnames = {
     'Wärmepumpe': 'hp',
@@ -35,11 +24,6 @@ with st.sidebar:
         os.path.dirname(__file__), '..', 'img', 'Logo_InnoNord_OWP.png'
         )
     st.image(logo_inno, use_column_width=True)
-
-    # logo_foeder = os.path.join(
-    #     os.path.dirname(__file__), '..', 'img', 'Logos_Förderer.png'
-    #     )
-    # st.image(logo_foeder, use_column_width=True)
 
     logo = os.path.join(
         os.path.dirname(__file__), '..', 'img', 'Logo_ZNES_mitUnisV2.svg'
