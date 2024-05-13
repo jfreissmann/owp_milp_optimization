@@ -71,6 +71,8 @@ else:
 with tab1:
     st.header('Überblick der Optimierungsergebnisse')
 
+    col_cap, col_sum = st.columns([1, 2], gap='large')
+
     overview_caps = ss.energy_system.data_caps.copy()
     if tes_used:
         overview_caps.drop(columns=['cap_in_tes', 'cap_out_tes'], inplace=True)
@@ -80,7 +82,35 @@ with tab1:
     overview_caps.rename(index={0: 'Kapazität (MW bzw. MWh)'}, inplace=True)
     overview_caps = overview_caps.apply(lambda x: round(x, 1))
 
-    st.dataframe(overview_caps, use_container_width=True)
+    col_cap.dataframe(overview_caps.T, use_container_width=True)
+
+    qsum = pd.DataFrame(columns=['unit', 'qsum'])
+    idx = 0
+    for unit in ss.units:
+        unit = shortnames[unit]
+        if unit == 'tes':
+            tl = {'in': 'Ein', 'out': 'Aus'}
+            for var in ['in', 'out']:
+                unit_col = f'Q_{var}_{unit}'
+                qsum.loc[idx, 'unit'] = longnames[unit] + ' ' + tl[var]
+                qsum.loc[idx, 'qsum'] = ss.energy_system.data_all[unit_col].sum()
+                idx += 1
+        else:
+            if (unit == 'hp') or (unit == 'tes'):
+                unit_col = f'Q_out_{unit}'
+            else:
+                unit_col = f'Q_{unit}'
+            qsum.loc[idx, 'unit'] = longnames[unit]
+            qsum.loc[idx, 'qsum'] = ss.energy_system.data_all[unit_col].sum()
+            idx += 1
+
+    col_sum.altair_chart(
+        alt.Chart(qsum).mark_bar(color='#B54036').encode(
+            y=alt.Y('unit', title='Versorgungsanlage'),
+            x=alt.X('qsum', title='Gesamtwärmebereitstellung in MWh')
+            ),
+        use_container_width=True
+        )
 
 with tab2:
     st.header('Geordnete Jahresdauerlinien des Anlageneinsatzes')
@@ -100,7 +130,7 @@ with tab2:
             y=alt.Y('value', title='Stündliche Wärmeproduktion in MWh'),
             x=alt.X('Stunde', title='Stunden'),
             color='variable'
-        ),
+            ),
         use_container_width=True
         )
 
