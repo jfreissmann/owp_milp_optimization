@@ -1,3 +1,4 @@
+import datetime as dt
 import json
 import os
 
@@ -99,12 +100,11 @@ with tab2:
         )
     heatprod.index.names = ['Stunde']
     heatprod.reset_index(inplace=True)
-    print(heatprod)
 
     st.altair_chart(
         alt.Chart(heatprod.melt('Stunde')).mark_line(color='#EC6707').encode(
             y=alt.Y('value', title='Stündliche Wärmeproduktion in MWh'),
-            x=alt.X('Stunde', title='Datum'),
+            x=alt.X('Stunde', title='Stunden'),
             color='variable'
         ),
         use_container_width=True
@@ -113,3 +113,35 @@ with tab2:
 if tes_used:
     with tab3:
         st.header('Füllstand des thermischen Energiespeichers')
+
+        col_sel, col_tes = st.columns([1, 2], gap='large')
+
+        dates = col_sel.date_input(
+            'Zeitraum auswählen:',
+            value=(
+                ss.energy_system.data_all.index[0],
+                ss.energy_system.data_all.index[-1]
+                ),
+            min_value=ss.energy_system.data_all.index[0],
+            max_value=ss.energy_system.data_all.index[-1],
+            format='DD.MM.YYYY', key='date_picker_storage_content'
+            )
+        dates = [
+            dt.datetime(year=d.year, month=d.month, day=d.day) for d in dates
+            ]
+        if len(dates) == 1:
+            dates.append(dates[0] + dt.timedelta(days=1))
+
+        tessoc = ss.energy_system.data_all.loc[
+            dates[0]:dates[1], 'storage_content_tes'
+            ].copy().to_frame()
+        tessoc.index.names = ['Date']
+        tessoc.reset_index(inplace=True)
+
+        col_tes.altair_chart(
+            alt.Chart(tessoc).mark_line(color='#EC6707').encode(
+                y=alt.Y('storage_content_tes', title='Speicherstand in MWh'),
+                x=alt.X('Date', title='Datum')
+            ),
+            use_container_width=True
+            )
