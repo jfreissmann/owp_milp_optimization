@@ -25,6 +25,17 @@ longnames = {
     'tes': 'Wärmespeicher'
 }
 
+colors = {
+    'Wärmepumpe': '#B54036',
+    'Gas- und Dampfkratwerk': '#00395B',
+    'Blockheizkraftwerk': '#00395B',
+    'Spitzenlastkessel': '#EC6707',
+    'Solarthermie': '#EC6707',
+    'Wärmespeicher Ein': 'slategrey',
+    'Wärmespeicher Aus': 'dimgrey',
+    'Wärmebedarf': '#31333f'
+}
+
 # %% MARK: Sidebar
 with st.sidebar:
     st.subheader('Offene Wärmespeicherplanung')
@@ -160,35 +171,66 @@ with tab2:
     heatprod = pd.DataFrame()
     for col in ss.energy_system.data_all.columns:
         if 'Q_' in col:
-            heatprod[col] = ss.energy_system.data_all[col].copy()
+            this_unit = None
+            for unit in ss.units:
+                unit = shortnames[unit]
+                if unit in col:
+                    this_unit = unit
+            if this_unit is None:
+                collabel = 'Wärmebedarf'
+            elif this_unit == 'tes':
+                if '_in' in col:
+                    collabel = longnames[this_unit] + ' Ein'
+                elif '_out' in col:
+                    collabel = longnames[this_unit] + ' Aus'
+            else:
+                collabel = longnames[this_unit]
+            heatprod[collabel] = ss.energy_system.data_all[col].copy()
     heatprod_sorted = pd.DataFrame(
         np.sort(heatprod.values, axis=0)[::-1], columns=heatprod.columns
         )
     heatprod_sorted.index.names = ['Stunde']
     heatprod_sorted.reset_index(inplace=True)
 
+    hprod_sorted_melt = heatprod_sorted.melt('Stunde')
+    hprod_sorted_melt.rename(
+        columns={'variable': 'Versorgungsanlage'}, inplace=True
+        )
+
     st.altair_chart(
-        alt.Chart(heatprod_sorted.melt('Stunde')).mark_line().encode(
+        alt.Chart(hprod_sorted_melt).mark_line().encode(
             y=alt.Y('value', title='Stündliche Wärmeproduktion in MWh'),
             x=alt.X('Stunde', title='Stunden'),
-            color='variable'
+            color=alt.Color('Versorgungsanlage').scale(
+                domain=list(heatprod.columns),
+                range=[colors[c] for c in heatprod.columns]
+                )
             ),
         use_container_width=True
         )
 
-    st.subheader('Tatsächlicher Anlageneinsatzes')
+    st.subheader('Tatsächlicher Anlageneinsatz')
 
     if tes_used:
-        heatprod['Q_in_tes'] *= -1
-    heatprod.drop('Q_demand', axis=1, inplace=True)
+        # heatprod['Q_in_tes'] *= -1
+        heatprod['Wärmespeicher Ein'] *= -1
+    heatprod.drop('Wärmebedarf', axis=1, inplace=True)
     heatprod.index.names = ['Date']
     heatprod.reset_index(inplace=True)
 
+    hprod_melt = heatprod.melt('Date')
+    hprod_melt.rename(
+        columns={'variable': 'Versorgungsanlage'}, inplace=True
+        )
+
     st.altair_chart(
-        alt.Chart(heatprod.melt('Date')).mark_line().encode(
+        alt.Chart(hprod_melt).mark_line().encode(
             y=alt.Y('value', title='Stündliche Wärmeproduktion in MWh'),
             x=alt.X('Date', title='Datum'),
-            color='variable'
+            color=alt.Color('Versorgungsanlage').scale(
+                domain=[c for c in heatprod.columns if c != 'Date'],
+                range=[colors[c] for c in heatprod.columns if c != 'Date']
+                )
             ),
         use_container_width=True
         )
