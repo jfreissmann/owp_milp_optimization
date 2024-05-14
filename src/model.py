@@ -174,6 +174,7 @@ class EnergySystem():
                                 ),
                             max=self.param_units[unit]['Q_rel_max'],
                             min=self.param_units[unit]['Q_rel_min'],
+                            nonconvex=solph.NonConvex(),
                             variable_costs=var_cost
                             )
                         },
