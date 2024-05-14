@@ -61,11 +61,11 @@ with st.sidebar:
 tes_used = 'tes' in ss.param_units.keys()
 if tes_used:
     tab1, tab2, tab3 = st.tabs(
-        ['Überblick', 'Jahresdauerlinien', 'Speicherstand']
+        ['Überblick', 'Anlageneinsatz', 'Speicherstand']
         )
 else:
     tab1, tab2 = st.tabs(
-        ['Überblick', 'Jahresdauerlinien']
+        ['Überblick', 'Anlageneinsatz']
         )
 
 with tab1:
@@ -131,6 +131,7 @@ with tab1:
         )
 
     unit_cost.drop('Gesamtbetriebskosten', axis=0, inplace=True)
+    unit_cost = unit_cost.apply(lambda x: round(x, 2))
 
     col_cost.dataframe(unit_cost, use_container_width=True)
 
@@ -154,22 +155,39 @@ with tab1:
         )
 
 with tab2:
-    st.header('Geordnete Jahresdauerlinien des Anlageneinsatzes')
+    st.subheader('Geordnete Jahresdauerlinien des Anlageneinsatzes')
 
     heatprod = pd.DataFrame()
     for col in ss.energy_system.data_all.columns:
         if 'Q_' in col:
             heatprod[col] = ss.energy_system.data_all[col].copy()
-    heatprod = pd.DataFrame(
+    heatprod_sorted = pd.DataFrame(
         np.sort(heatprod.values, axis=0)[::-1], columns=heatprod.columns
         )
-    heatprod.index.names = ['Stunde']
+    heatprod_sorted.index.names = ['Stunde']
+    heatprod_sorted.reset_index(inplace=True)
+
+    st.altair_chart(
+        alt.Chart(heatprod_sorted.melt('Stunde')).mark_line().encode(
+            y=alt.Y('value', title='Stündliche Wärmeproduktion in MWh'),
+            x=alt.X('Stunde', title='Stunden'),
+            color='variable'
+            ),
+        use_container_width=True
+        )
+
+    st.subheader('Tatsächlicher Anlageneinsatzes')
+
+    if tes_used:
+        heatprod['Q_in_tes'] *= -1
+    heatprod.drop('Q_demand', axis=1, inplace=True)
+    heatprod.index.names = ['Date']
     heatprod.reset_index(inplace=True)
 
     st.altair_chart(
-        alt.Chart(heatprod.melt('Stunde')).mark_line(color='#EC6707').encode(
+        alt.Chart(heatprod.melt('Date')).mark_line().encode(
             y=alt.Y('value', title='Stündliche Wärmeproduktion in MWh'),
-            x=alt.X('Stunde', title='Stunden'),
+            x=alt.X('Date', title='Datum'),
             color='variable'
             ),
         use_container_width=True
