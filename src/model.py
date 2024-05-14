@@ -18,7 +18,7 @@ class EnergySystem():
             timeindex=pd.date_range(
                 data.index[0], periods=self.periods, freq='h'
                 ),
-            infer_last_interval=False
+            infer_last_interval=True
             )
 
         self.bwsf = calc_bwsf(
@@ -258,6 +258,8 @@ class EnergySystem():
             [data_gnw, data_enw, data_hnw, data_chpnode, data_tes],
             axis=1
             )
+        if self.data_all.iloc[-1, :].isna().values.all():
+            self.data_all.drop(self.data_all.tail(1).index, inplace=True)
 
         ldpath = os.path.abspath(
             os.path.join(
