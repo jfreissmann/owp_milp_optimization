@@ -5,7 +5,7 @@
         "cop": 3.0,
         "op_cost_var": 1.20,
         "op_cost_fix": 4000.00,
-        "inv_spez": 500000.00,
+        "inv_spez": 510000.00,
         "cap_max": 50,
         "cap_min": 0
     },
@@ -43,14 +43,14 @@
     },
     "sol": {
         "eta_col": 0.3,
-        "op_cost_var": 0.21,
-        "op_cost_fix": 0.09,
-        "inv_spez": 9999,
+        "op_cost_var": 0.22,
+        "op_cost_fix": 0.04,
+        "inv_spez": 199,
         "A_max": 150000,
         "A_min": 0
     },
     "tes": {
-        "inv_spez": 9999,
+        "inv_spez": 580,
         "Q_max": 8472,
         "Q_min": 0,
         "Q_in_to_cap": 0.041666667,
