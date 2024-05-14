@@ -147,7 +147,6 @@ with st.container(border=True):
     opt = st.button(label='🖥️**Optimierung starten**', use_container_width=True)
     if opt:
         with st.spinner('Optimierung wird durchgeführt...'):
-            print(ss.param_units)
             ss.energy_system = EnergySystem(
                 ss.data, ss.param_units, ss.param_opt
                 )
@@ -168,7 +167,6 @@ with st.container(border=True):
             ss.energy_system.calc_econ_params()
             ss.energy_system.calc_ecol_params()
             st.toast('Postprocessing ist durchgeführt')
-            ss.energy_system.param_units
 
 if opt:
     with st.container(border=True):

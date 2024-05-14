@@ -88,10 +88,17 @@ with tab1:
     overview_caps = ss.energy_system.data_caps.copy()
     if tes_used:
         overview_caps.drop(columns=['cap_in_tes', 'cap_out_tes'], inplace=True)
-    overview_caps.rename(columns={
-        c: longnames[c.split('_')[-1]] for c in overview_caps.columns
-        }, inplace=True)
-    overview_caps.rename(index={0: 'Kapazität (MW bzw. MWh)'}, inplace=True)
+    renamedict = {}
+    for col in overview_caps.columns:
+        if 'tes' in col:
+            renamedict[col] = longnames[col.split('_')[-1]] + ' (MWh)'
+        elif 'sol' in col:
+            renamedict[col] = longnames[col.split('_')[-1]] + ' (m²)'
+        else:
+            renamedict[col] = longnames[col.split('_')[-1]] + ' (MW)'
+
+    overview_caps.rename(columns=renamedict, inplace=True)
+    overview_caps.rename(index={0: 'Kapazität'}, inplace=True)
     overview_caps = overview_caps.apply(lambda x: round(x, 1))
 
     col_cap.dataframe(overview_caps.T, use_container_width=True)
