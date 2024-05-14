@@ -81,8 +81,7 @@ data_overview.rename(
         'el_spot_price': 'Spotmarkt Strompreis (€/MWh)',
         'ef_om': 'Emissionsfaktor Strommix (kg/MWh)',
         'gas_price': 'Gaspreis (€/MWh)',
-        'co2_price': 'CO₂-Preis (€/MWh)',
-        'solar_heat_flow': 'Spez. solare Einstrahlung (Wh/m²)'
+        'co2_price': 'CO₂-Preis (€/MWh)'
         }, inplace=True
     )
 
@@ -169,6 +168,7 @@ with st.container(border=True):
             ss.energy_system.calc_econ_params()
             ss.energy_system.calc_ecol_params()
             st.toast('Postprocessing ist durchgeführt')
+            ss.energy_system.param_units
 
 if opt:
     with st.container(border=True):

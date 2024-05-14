@@ -348,10 +348,13 @@ class EnergySystem():
                 )
             ).sum()
 
-        self.key_params['cost_el_internal'] = (
-            self.data_all['P_internal']
-            * self.param_opt['elec_consumer_charges_self']
-            ).sum()
+        if 'P_internal' in self.data_all.columns:
+            self.key_params['cost_el_internal'] = (
+                self.data_all['P_internal']
+                * self.param_opt['elec_consumer_charges_self']
+                ).sum()
+        else:
+            self.key_params['cost_el_internal'] = 0
 
         self.key_params['cost_el'] = (
             self.key_params['cost_el_grid']
