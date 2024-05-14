@@ -69,10 +69,11 @@ else:
         )
 
 with tab1:
-    st.header('Überblick der Optimierungsergebnisse')
+    # st.header('Überblick der Optimierungsergebnisse')
 
     col_cap, col_sum = st.columns([1, 2], gap='large')
 
+    col_cap.subheader('Optimierte Anlagenkapazitäten')
     overview_caps = ss.energy_system.data_caps.copy()
     if tes_used:
         overview_caps.drop(columns=['cap_in_tes', 'cap_out_tes'], inplace=True)
@@ -84,6 +85,7 @@ with tab1:
 
     col_cap.dataframe(overview_caps.T, use_container_width=True)
 
+    col_sum.subheader('Wärmeproduktion')
     qsum = pd.DataFrame(columns=['unit', 'qsum'])
     idx = 0
     for unit in ss.units:
@@ -110,6 +112,45 @@ with tab1:
             x=alt.X('qsum', title='Gesamtwärmebereitstellung in MWh')
             ),
         use_container_width=True
+        )
+
+    st.subheader('Wirtschaftliche Kennzahlen')
+    col_lcoh, col_cost = st.columns([1, 5])
+    col_lcoh.metric('LCOH in €/MWh', round(ss.energy_system.key_params['LCOH'], 2))
+
+    unit_cost = ss.energy_system.cost_df.copy()
+    unit_cost.rename(columns=longnames, inplace=True)
+    unit_cost.rename(
+        index={
+            'invest': 'Investitionskosten',
+            'op_cost_var': 'Variable Betriebskosten',
+            'op_cost_fix': 'Fixe Betriebskosten',
+            'op_cost': 'Gesamtbetriebskosten'
+            },
+        inplace=True
+        )
+
+    unit_cost.drop('Gesamtbetriebskosten', axis=0, inplace=True)
+
+    col_cost.dataframe(unit_cost, use_container_width=True)
+
+    st.subheader('Ökologische Kennzahlen')
+    met1, met2, met3, met4= st.columns([1, 1, 1, 1])
+    met1.metric(
+        'Gesamtemissionen in kT',
+        round(ss.energy_system.key_params['Total Emissions OM']/1e6, 1)
+        )
+    met2.metric(
+        'Emissionen durch Gasbezug in kT',
+        round(ss.energy_system.key_params['Emissions OM (Gas)']/1e6, 1)
+        )
+    met3.metric(
+        'Emissionen durch Strombezug in kT',
+        round(ss.energy_system.key_params['Emissions OM (Electricity)']/1e6, 1)
+        )
+    met4.metric(
+        'Emissionsgutschriften durch Stromproduktion in kT',
+        round(ss.energy_system.key_params['Emissions OM (Spotmarket)']/1e6, 1)
         )
 
 with tab2:
