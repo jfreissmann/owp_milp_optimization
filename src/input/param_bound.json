@@ -152,5 +152,71 @@
             "Konzessionsabgabe": 0.0,
             "Stromsteuer": 2.05
         }
+    },
+    "2021": {
+        "Stromkosten (extern)": {
+            "EEG-Umlage": 6.500,
+            "Netzentgelte": 2.67,
+            "KWKG-Umlage": 0.254,
+            "Offshore Haftungsumlage": 0.395,
+            "AbLaV-Umlage": 0.009,
+            "StromNEV-Umlage §19 Umlage": 0.066,
+            "Konzessionsabgabe": 0.11,
+            "Stromsteuer": 2.05
+        },
+        "Stromkosten (intern)": {
+            "EEG-Umlage": 2.600,
+            "Netzentgelte": 0.0,
+            "KWKG-Umlage": 0.0,
+            "Offshore Haftungsumlage": 0.0,
+            "AbLaV-Umlage": 0.0,
+            "StromNEV-Umlage §19 Umlage": 0.0,
+            "Konzessionsabgabe": 0.0,
+            "Stromsteuer": 2.05
+        }
+    },
+    "2022": {
+        "Stromkosten (extern)": {
+            "EEG-Umlage": 1.862,
+            "Netzentgelte": 2.96,
+            "KWKG-Umlage": 0.378,
+            "Offshore Haftungsumlage": 0.419,
+            "AbLaV-Umlage": 0.003,
+            "StromNEV-Umlage §19 Umlage": 0.066,
+            "Konzessionsabgabe": 0.11,
+            "Stromsteuer": 2.05
+        },
+        "Stromkosten (intern)": {
+            "EEG-Umlage": 0.745,
+            "Netzentgelte": 0.0,
+            "KWKG-Umlage": 0.0,
+            "Offshore Haftungsumlage": 0.0,
+            "AbLaV-Umlage": 0.0,
+            "StromNEV-Umlage §19 Umlage": 0.0,
+            "Konzessionsabgabe": 0.0,
+            "Stromsteuer": 2.05
+        }
+    },
+    "2023": {
+        "Stromkosten (extern)": {
+            "EEG-Umlage": 0.0,
+            "Netzentgelte": 3.35,
+            "KWKG-Umlage": 0.378,
+            "Offshore Haftungsumlage": 0.591,
+            "AbLaV-Umlage": 0.0,
+            "StromNEV-Umlage §19 Umlage": 0.066,
+            "Konzessionsabgabe": 0.11,
+            "Stromsteuer": 2.05
+        },
+        "Stromkosten (intern)": {
+            "EEG-Umlage": 0.0,
+            "Netzentgelte": 0.0,
+            "KWKG-Umlage": 0.0,
+            "Offshore Haftungsumlage": 0.0,
+            "AbLaV-Umlage": 0.0,
+            "StromNEV-Umlage §19 Umlage": 0.0,
+            "Konzessionsabgabe": 0.0,
+            "Stromsteuer": 2.05
+        }
     }
 }
