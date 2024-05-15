@@ -70,16 +70,28 @@ with st.sidebar:
 
 # %% MARK: Main Window
 tes_used = 'tes' in ss.param_units.keys()
-if tes_used:
-    tab1, tab2, tab3 = st.tabs(
-        ['Überblick', 'Anlageneinsatz', 'Speicherstand']
-        )
-else:
-    tab1, tab2 = st.tabs(
-        ['Überblick', 'Anlageneinsatz']
-        )
+chp_used = ('ice' in ss.param_units.keys()) or ('ccet' in ss.param_units.keys())
 
-with tab1:
+if chp_used:
+    if tes_used:
+        tab_ov, tab_unit, tab_el, tab_tes = st.tabs(
+            ['Überblick', 'Anlageneinsatz', 'Stromproduktion', 'Speicherstand']
+            )
+    else:
+        tab_ov, tab_unit, tab_el = st.tabs(
+            ['Überblick', 'Anlageneinsatz', 'Stromproduktion']
+            )
+else:
+    if tes_used:
+        tab_ov, tab_unit, tab_tes = st.tabs(
+            ['Überblick', 'Anlageneinsatz', 'Speicherstand']
+            )
+    else:
+        tab_ov, tab_unit = st.tabs(
+            ['Überblick', 'Anlageneinsatz']
+            )
+
+with tab_ov:
     # st.header('Überblick der Optimierungsergebnisse')
 
     col_cap, col_sum = st.columns([1, 2], gap='large')
@@ -172,7 +184,7 @@ with tab1:
         round(ss.energy_system.key_params['Emissions OM (Spotmarket)']/1e6, 1)
         )
 
-with tab2:
+with tab_unit:
     st.subheader('Geordnete Jahresdauerlinien des Anlageneinsatzes')
 
     heatprod = pd.DataFrame()
@@ -242,9 +254,63 @@ with tab2:
         use_container_width=True
         )
 
+if chp_used:
+    with tab_el:
+        st.subheader('Stromproduktion und -erlöse')
+
+        col_sel, col_el = st.columns([1, 2], gap='large')
+
+        dates = col_sel.date_input(
+            'Zeitraum auswählen:',
+            value=(
+                ss.energy_system.data_all.index[0],
+                ss.energy_system.data_all.index[-1]
+                ),
+            min_value=ss.energy_system.data_all.index[0],
+            max_value=ss.energy_system.data_all.index[-1],
+            format='DD.MM.YYYY', key='date_picker_el_production'
+            )
+        dates = [
+            dt.datetime(year=d.year, month=d.month, day=d.day) for d in dates
+            ]
+        # Avoid error while only one date is picked
+        if len(dates) == 1:
+            dates.append(dates[0] + dt.timedelta(days=1))
+
+        elprod = ss.energy_system.data_all.loc[
+            dates[0]:dates[1], 'P_spotmarket'
+            ].copy().to_frame()
+        elprod.index.names = ['Date']
+        elprod.reset_index(inplace=True)
+
+        col_el.altair_chart(
+            alt.Chart(elprod).mark_line(color='#00395B').encode(
+                y=alt.Y(
+                    'P_spotmarket',
+                    title='Ins Netz eingespeiste Elektrizität in MWh'
+                    ),
+                x=alt.X('Date', title='Datum')
+            ),
+            use_container_width=True
+            )
+
+        elprice = ss.all_el_prices.loc[
+            dates[0]:dates[1], 'el_spot_price'
+            ].copy().to_frame()
+        elprice.index.names = ['Date']
+        elprice.reset_index(inplace=True)
+
+        col_el.altair_chart(
+            alt.Chart(elprice).mark_line(color='#00395B').encode(
+                y=alt.Y('el_spot_price', title='Spotmarkt Strompreis in €/MWh'),
+                x=alt.X('Date', title='Datum')
+            ),
+            use_container_width=True
+            )
+
 if tes_used:
-    with tab3:
-        st.header('Füllstand des thermischen Energiespeichers')
+    with tab_tes:
+        st.subheader('Füllstand des thermischen Energiespeichers')
 
         col_sel, col_tes = st.columns([1, 2], gap='large')
 
