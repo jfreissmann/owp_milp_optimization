@@ -6,7 +6,7 @@
         "op_cost_var": 1.20,
         "op_cost_fix": 4000.00,
         "inv_spez": 510000.00,
-        "cap_max": 50,
+        "cap_max": 353,
         "cap_min": 0
     },
     "ccet": {
