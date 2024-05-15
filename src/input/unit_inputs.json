@@ -121,7 +121,7 @@
         },
         "op_cost_var": {
             "name": "Variable Betriebskosten",
-            "min": 0.0,
+            "min": -100.0,
             "max": 100.0,
             "type": "float",
             "unit": "€/MW"
