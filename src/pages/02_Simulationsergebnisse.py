@@ -91,6 +91,7 @@ else:
             ['Überblick', 'Anlageneinsatz']
             )
 
+# %% MARK: Overview
 with tab_ov:
     # st.header('Überblick der Optimierungsergebnisse')
 
@@ -184,6 +185,7 @@ with tab_ov:
         round(ss.energy_system.key_params['Emissions OM (Spotmarket)']/1e6, 1)
         )
 
+# %% MARK: Unit Commitment
 with tab_unit:
     st.subheader('Geordnete Jahresdauerlinien des Anlageneinsatzes')
 
@@ -254,6 +256,7 @@ with tab_unit:
         use_container_width=True
         )
 
+# %% MARK: Electricity Production
 if chp_used:
     with tab_el:
         st.subheader('Stromproduktion und -erlöse')
@@ -308,6 +311,7 @@ if chp_used:
             use_container_width=True
             )
 
+# %% MARK: TES Content
 if tes_used:
     with tab_tes:
         st.subheader('Füllstand des thermischen Energiespeichers')
@@ -331,16 +335,35 @@ if tes_used:
         if len(dates) == 1:
             dates.append(dates[0] + dt.timedelta(days=1))
 
-        tessoc = ss.energy_system.data_all.loc[
-            dates[0]:dates[1], 'storage_content_tes'
-            ].copy().to_frame()
-        tessoc.index.names = ['Date']
-        tessoc.reset_index(inplace=True)
+        tesdata = ss.energy_system.data_all.loc[
+            dates[0]:dates[1], ['storage_content_tes', 'Q_in_tes', 'Q_out_tes']
+            ].copy()
+        tesdata['Q_in_tes'] *= -1
+        tesdata.rename(
+            columns={
+                'Q_in_tes': 'Wärmespeicher Ein',
+                'Q_out_tes': 'Wärmespeicher Aus'},
+            inplace=True
+            )
+        tesdata.index.names = ['Date']
+        tesdata.reset_index(inplace=True)
 
         col_tes.altair_chart(
-            alt.Chart(tessoc).mark_line(color='#EC6707').encode(
+            alt.Chart(tesdata).mark_line(color='#EC6707').encode(
                 y=alt.Y('storage_content_tes', title='Speicherstand in MWh'),
-                x=alt.X('Date', title='Datum')
-            ),
+                x=alt.X('Date', title='Datum'),
+                ),
+            use_container_width=True
+            )
+
+        domain = ['Wärmespeicher Aus', 'Wärmespeicher Ein']
+        col_tes.altair_chart(
+            alt.Chart(tesdata[['Date', *domain]].melt('Date')).mark_bar(size=0.5).encode(
+                y=alt.Y('value', title='Speicherbe- & -entladung in MWh'),
+                x=alt.X('Date', title='Datum'),
+                color=alt.Color('variable').scale(
+                    domain=domain, range=[colors[d] for d in domain]
+                    ).legend(None)
+                ),
             use_container_width=True
             )
