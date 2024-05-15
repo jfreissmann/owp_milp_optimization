@@ -15,19 +15,16 @@ def read_input_data():
     inputpath = os.path.abspath(os.path.join(
         os.path.dirname(__file__), '..', 'input'
         ))
-    ss.all_heat_load = pd.read_csv(
+    all_heat_load = pd.read_csv(
         os.path.join(inputpath, 'heat_load.csv'),
         sep=';', index_col=0, parse_dates=True
         )
-    ss.eco_data = pd.read_csv(
+    eco_data = pd.read_csv(
         os.path.join(inputpath, 'eco_data.csv'),
         sep=';', index_col=0, parse_dates=True
         )
-    ss.all_el_prices = ss.eco_data['el_spot_price'].to_frame()
-    ss.all_el_emissions = ss.eco_data['ef_om'].to_frame()
-    ss.all_gas_prices = ss.eco_data['gas_price'].to_frame()
-    ss.all_co2_prices = ss.eco_data['co2_price'].to_frame()
-    ss.all_solar_heat_flow = ss.eco_data['solar_heat_flow'].to_frame()
+
+    return all_heat_load, eco_data
 
 
 # %% MARK: Parameters
@@ -48,7 +45,13 @@ longnames = {
     'tes': 'Wärmespeicher'
 }
 
-read_input_data()
+ss.all_heat_load, ss.eco_data = read_input_data()
+
+ss.all_el_prices = ss.eco_data['el_spot_price'].to_frame()
+ss.all_el_emissions = ss.eco_data['ef_om'].to_frame()
+ss.all_gas_prices = ss.eco_data['gas_price'].to_frame()
+ss.all_co2_prices = ss.eco_data['co2_price'].to_frame()
+ss.all_solar_heat_flow = ss.eco_data['solar_heat_flow'].to_frame()
 
 unitpath = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..', 'input', 'param_units.json')
