@@ -234,9 +234,15 @@ class EnergySystem():
 
     def solve_model(self):
         self.model = solph.Model(self.es)
+        if self.param_opt['Solver'] == 'Gurobi':
+            solver = 'gurobi'
+            gapname = 'MIPGap'
+        elif self.param_opt['Solver'] == 'HiGHS':
+            solver = 'appsi_highs'
+            gapname = 'mip_rel_gap'
         self.model.solve(
-            solver='gurobi', solve_kwargs={'tee': True},
-            cmdline_options={'MIPGap': self.param_opt['MIPGap']}
+            solver=solver, solve_kwargs={'tee': True},
+            cmdline_options={gapname: self.param_opt['MIPGap']}
             )
 
     def get_results(self):

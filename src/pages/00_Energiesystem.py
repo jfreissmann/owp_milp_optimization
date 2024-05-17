@@ -577,6 +577,10 @@ with tab6:
     )
     col_opt.subheader('Optimierung')
 
+    ss.param_opt['Solver'] = col_opt.selectbox(
+        'Solver', options=['Gurobi', 'HiGHS']
+        )
+
     ss.param_opt['MIPGap'] *= 100
     ss.param_opt['MIPGap'] = col_opt.number_input(
         'MIP Gap in %', value=ss.param_opt['MIPGap'], help=help_mip,
