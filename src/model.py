@@ -238,7 +238,7 @@ class EnergySystem():
             solver = 'gurobi'
             gapname = 'MIPGap'
         elif self.param_opt['Solver'] == 'HiGHS':
-            solver = 'appsi_highs'
+            solver = 'highs'
             gapname = 'mip_rel_gap'
         self.model.solve(
             solver=solver, solve_kwargs={'tee': True},

@@ -169,20 +169,20 @@ with tab_ov:
     st.subheader('Ökologische Kennzahlen')
     met1, met2, met3, met4= st.columns([1, 1, 1, 1])
     met1.metric(
-        'Gesamtemissionen in kT',
-        round(ss.energy_system.key_params['Total Emissions OM']/1e6, 1)
+        'Gesamtemissionen in T',
+        round(ss.energy_system.key_params['Total Emissions OM']/1e3, 1)
         )
     met2.metric(
-        'Emissionen durch Gasbezug in kT',
-        round(ss.energy_system.key_params['Emissions OM (Gas)']/1e6, 1)
+        'Emissionen durch Gasbezug in T',
+        round(ss.energy_system.key_params['Emissions OM (Gas)']/1e3, 1)
         )
     met3.metric(
-        'Emissionen durch Strombezug in kT',
-        round(ss.energy_system.key_params['Emissions OM (Electricity)']/1e6, 1)
+        'Emissionen durch Strombezug in T',
+        round(ss.energy_system.key_params['Emissions OM (Electricity)']/1e3, 1)
         )
     met4.metric(
-        'Emissionsgutschriften durch Stromproduktion in kT',
-        round(ss.energy_system.key_params['Emissions OM (Spotmarket)']/1e6, 1)
+        'Emissionsgutschriften durch Stromproduktion in T',
+        round(ss.energy_system.key_params['Emissions OM (Spotmarket)']/1e3, 1)
         )
 
 # %% MARK: Unit Commitment
