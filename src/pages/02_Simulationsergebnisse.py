@@ -235,7 +235,7 @@ with tab_unit:
     if tes_used:
         # heatprod['Q_in_tes'] *= -1
         heatprod['Wärmespeicher Ein'] *= -1
-    heatprod.drop('Wärmebedarf', axis=1, inplace=True)
+    # heatprod.drop('Wärmebedarf', axis=1, inplace=True)
     heatprod.index.names = ['Date']
     heatprod.reset_index(inplace=True)
 
