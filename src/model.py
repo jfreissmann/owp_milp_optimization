@@ -364,20 +364,27 @@ class EnergySystem():
         self.key_params['invest_total'] = self.cost_df.loc['invest'].sum()
 
         # total gas costs
-        self.key_params['cost_gas'] = (
-            self.data_all['H_source'] * (
-                self.data['gas_price']
-                + self.data['co2_price'] * self.param_opt['ef_gas']
-                )
-            ).sum()
+        if 'H_source' in self.data_all.columns:
+            self.key_params['cost_gas'] = (
+                self.data_all['H_source'] * (
+                    self.data['gas_price']
+                    + self.data['co2_price'] * self.param_opt['ef_gas']
+                    )
+                ).sum()
+        else:
+            self.key_params['cost_gas'] = 0
 
         # total electricity costs
-        self.key_params['cost_el_grid'] = (
-            self.data_all['P_source'] * (
-                self.data['el_spot_price']
-                + self.param_opt['elec_consumer_charges_grid']
-                )
-            ).sum()
+        if 'P_source' in self.data_all.columns:
+            self.key_params['cost_el_grid'] = (
+                self.data_all['P_source'] * (
+                    self.data['el_spot_price']
+                    + self.param_opt['elec_consumer_charges_grid']
+                    )
+                ).sum()
+        else:
+            self.key_params['cost_el_grid'] = 0
+
 
         if 'P_internal' in self.data_all.columns:
             self.key_params['cost_el_internal'] = (
