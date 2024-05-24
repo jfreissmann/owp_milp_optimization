@@ -14,6 +14,7 @@ shortnames = {
     'Blockheizkraftwerk': 'ice',
     'Solarthermie': 'sol',
     'Spitzenlastkessel': 'plb',
+    'Elektrodenheizkessel': 'eb',
     'Wärmespeicher': 'tes'
 }
 longnames = {
@@ -22,6 +23,7 @@ longnames = {
     'ice': 'Blockheizkraftwerk',
     'sol': 'Solarthermie',
     'plb': 'Spitzenlastkessel',
+    'eb': 'Elektrodenheizkessel',
     'tes': 'Wärmespeicher'
 }
 
@@ -33,7 +35,8 @@ colors = {
     'Solarthermie': '#EC6707',
     'Wärmespeicher Ein': 'slategrey',
     'Wärmespeicher Aus': 'dimgrey',
-    'Wärmebedarf': '#31333f'
+    'Wärmebedarf': '#31333f',
+    'Elektrodenheizkessel': '#EC6707'
 }
 
 # %% MARK: Sidebar

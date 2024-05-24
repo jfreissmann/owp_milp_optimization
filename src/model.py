@@ -13,6 +13,12 @@ class EnergySystem():
         self.param_units = param_units
         self.param_opt = param_opt
 
+        self.tes_used = 'tes' in self.param_units.keys()
+        self.chp_used = (
+            ('ice' in self.param_units.keys())
+            or ('ccet' in self.param_units.keys())
+            )
+
         self.periods = len(data.index)
         self.es = solph.EnergySystem(
             timeindex=pd.date_range(
@@ -262,19 +268,24 @@ class EnergySystem():
         data_gnw = views.node(self.results, 'gas network')['sequences']
         data_enw = views.node(self.results, 'electricity network')['sequences']
         data_hnw = views.node(self.results, 'heat network')['sequences']
-        data_chpnode = views.node(self.results, 'chp node')['sequences']
-        data_tes = views.node(self.results, 'tes')['sequences']
+
+        if self.chp_used:
+            data_chpnode = views.node(self.results, 'chp node')['sequences']
 
         data_hnw_caps = views.node(self.results, 'heat network')['scalars']
-        data_tes_cap = views.node(self.results, 'tes')['scalars'][
-            (('tes', 'None'), 'invest')
-            ]
+
+        if self.tes_used:
+            data_tes = views.node(self.results, 'tes')['sequences']
+            data_tes_cap = views.node(self.results, 'tes')['scalars'][
+                (('tes', 'None'), 'invest')
+                ]
 
         # Combine all data and relabel the column names
-        self.data_all = pd.concat(
-            [data_gnw, data_enw, data_hnw, data_chpnode, data_tes],
-            axis=1
-            )
+        self.data_all = pd.concat([data_gnw, data_enw, data_hnw], axis=1)
+        if self.tes_used:
+            self.data_all = pd.concat([self.data_all, data_tes], axis=1)
+        if self.chp_used:
+            self.data_all = pd.concat([self.data_all, data_chpnode], axis=1)
         if self.data_all.iloc[-1, :].isna().values.all():
             self.data_all.drop(self.data_all.tail(1).index, inplace=True)
 
@@ -290,7 +301,8 @@ class EnergySystem():
             ].copy()
 
         self.data_caps = data_hnw_caps
-        self.data_caps['cap_tes'] = data_tes_cap
+        if self.tes_used:
+            self.data_caps['cap_tes'] = data_tes_cap
         result_labeling(self.data_caps, labeldictpath=ldpath)
 
         for col in self.data_all.columns:

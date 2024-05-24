@@ -13,6 +13,7 @@ shortnames = {
     'Blockheizkraftwerk': 'ice',
     'Solarthermie': 'sol',
     'Spitzenlastkessel': 'plb',
+    'Elektrodenheizkessel': 'eb',
     'Wärmespeicher': 'tes'
 }
 
