@@ -405,11 +405,14 @@ class EnergySystem():
             )
 
         # %% Revenue calculation
-        self.key_params['revenues_spotmarket'] = (
-            self.data_all['P_spotmarket'] * (
-                self.data['el_spot_price'] + self.param_opt['vNNE']
-                )
-            ).sum()
+        if 'P_internal' in self.data_all.columns:
+            self.key_params['revenues_spotmarket'] = (
+                self.data_all['P_spotmarket'] * (
+                    self.data['el_spot_price'] + self.param_opt['vNNE']
+                    )
+                ).sum()
+        else:
+            self.key_params['revenues_spotmarket'] = 0
 
         self.key_params['revenues_heat'] = (
             self.data_all['Q_demand'].sum() * self.param_opt['heat_price']
@@ -456,6 +459,8 @@ class EnergySystem():
             self.key_params['Emissions OM (Gas)'] = (
                 self.data_all['H_source'] * self.param_opt['ef_gas']
                 ).sum()
+        else:
+            self.key_params['Emissions OM (Gas)'] = 0
 
         if 'P_source' in self.data_all.columns:
             self.data_all['Emissions OM'] += (
@@ -464,6 +469,8 @@ class EnergySystem():
             self.key_params['Emissions OM (Electricity)'] = (
                 self.data_all['P_source'] * self.data['ef_om']
                 ).sum()
+        else:
+            self.key_params['Emissions OM (Electricity)'] = 0
 
         if 'P_spotmarket' in self.data_all.columns:
             self.data_all['Emissions OM'] -= (
@@ -472,6 +479,8 @@ class EnergySystem():
             self.key_params['Emissions OM (Spotmarket)'] = (
                 self.data_all['P_spotmarket'] * self.data['ef_om'] * -1
                 ).sum()
+        else:
+            self.key_params['Emissions OM (Spotmarket)'] = 0
 
         self.key_params['Total Emissions OM'] = (
             self.data_all['Emissions OM'].sum()
