@@ -146,17 +146,27 @@ class EnergySystem():
                 self.es.add(self.comps[unit])
                 internal_el = True
 
-            if unit in ['hp', 'plb']:
+            if unit in ['hp', 'plb', 'eb']:
                 if unit == 'hp':
                     eff = 'cop'
                     input_nw = 'enw'
-                    var_cost = self.param_units[unit]['op_cost_var']
+                    var_cost = (
+                        self.param_units[unit]['op_cost_var']
+                        + self.param_opt['elec_consumer_charges_self']
+                        )
                 elif unit == 'plb':
                     eff = 'eta'
                     input_nw = 'gnw'
                     var_cost = (
                         self.param_units[unit]['op_cost_var']
                         + self.param_opt['energy_tax']
+                        )
+                elif unit == 'eb':
+                    eff = 'eta'
+                    input_nw = 'enw'
+                    var_cost = (
+                        self.param_units[unit]['op_cost_var']
+                        + self.param_opt['elec_consumer_charges_self']
                         )
 
                 self.comps[unit] = solph.components.Converter(
@@ -318,6 +328,8 @@ class EnergySystem():
 
             if unit == 'plb':
                 add_cost = self.param_opt['energy_tax']
+                E_N_label = f'Q_{unit}'
+            elif unit == 'eb':
                 E_N_label = f'Q_{unit}'
             elif unit == 'hp':
                 E_N_label = f'Q_out_{unit}'

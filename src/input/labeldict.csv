@@ -10,6 +10,11 @@ plb;heat network;status;state_plb
 plb;heat network;status_nominal;state_nom_plb
 gas network;plb;flow;H_plb
 plb;heat network;invest;cap_plb
+eb;heat network;flow;Q_eb
+eb;heat network;status;state_eb
+eb;heat network;status_nominal;state_nom_eb
+electricity network;plb;flow;P_eb
+eb;heat network;invest;cap_eb
 ccet;heat network;flow;Q_ccet
 ccet;chp node;flow;P_ccet
 ccet;heat network;status;state_ccet

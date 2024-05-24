@@ -60,5 +60,15 @@
         "op_cost_fix": 3.0,
         "balanced": true,
         "init_storage": 0
+    },
+    "eb": {
+        "Q_rel_max": 1.0,
+        "Q_rel_min": 0.15,
+        "eta": 0.95,
+        "op_cost_var": 0.90,
+        "op_cost_fix": 1070.00,
+        "inv_spez": 150000.00,
+        "cap_max": 353,
+        "cap_min": 0
     }
 }
