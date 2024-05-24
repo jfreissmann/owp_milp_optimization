@@ -35,7 +35,7 @@ shortnames = {
     'Solarthermie': 'sol',
     'Spitzenlastkessel': 'plb',
     'Wärmespeicher': 'tes',
-    'Elektrodenheizkessel': 'ehk'
+    'Elektrodenheizkessel': 'eb'
 }
 longnames = {
     'hp': 'Wärmepumpe',
@@ -44,7 +44,7 @@ longnames = {
     'sol': 'Solarthermie',
     'plb': 'Spitzenlastkessel',
     'tes': 'Wärmespeicher',
-    'ehk': 'Elektroheizkessel'
+    'eb': 'Elektroheizkessel'
 }
 
 if 'eco_data' not in ss:
