@@ -190,7 +190,9 @@ with tab_ov:
 
 # %% MARK: Unit Commitment
 with tab_unit:
-    st.subheader('Geordnete Jahresdauerlinien des Anlageneinsatzes')
+    col_sel, col_unit = st.columns([1, 2], gap='large')
+
+    col_unit.subheader('Geordnete Jahresdauerlinien des Anlageneinsatzes')
 
     heatprod = pd.DataFrame()
     for col in ss.energy_system.data_all.columns:
@@ -210,30 +212,38 @@ with tab_unit:
             else:
                 collabel = longnames[this_unit]
             heatprod[collabel] = ss.energy_system.data_all[col].copy()
+
+    selection = col_sel.multiselect(
+        'Wähle die Wärmeversorgungsanlagen aus.',
+        list(heatprod.columns),
+        default=list(heatprod.columns),
+        placeholder='Wärmeversorgungsanlagen'
+        )
+
     heatprod_sorted = pd.DataFrame(
         np.sort(heatprod.values, axis=0)[::-1], columns=heatprod.columns
         )
     heatprod_sorted.index.names = ['Stunde']
     heatprod_sorted.reset_index(inplace=True)
 
-    hprod_sorted_melt = heatprod_sorted.melt('Stunde')
+    hprod_sorted_melt = heatprod_sorted[['Stunde'] + selection].melt('Stunde')
     hprod_sorted_melt.rename(
         columns={'variable': 'Versorgungsanlage'}, inplace=True
         )
 
-    st.altair_chart(
+    col_unit.altair_chart(
         alt.Chart(hprod_sorted_melt).mark_line().encode(
             y=alt.Y('value', title='Stündliche Wärmeproduktion in MWh'),
             x=alt.X('Stunde', title='Stunden'),
             color=alt.Color('Versorgungsanlage').scale(
-                domain=list(heatprod.columns),
-                range=[colors[c] for c in heatprod.columns]
+                domain=selection,
+                range=[colors[s] for s in selection]
                 )
             ),
         use_container_width=True
         )
 
-    st.subheader('Tatsächlicher Anlageneinsatz')
+    col_unit.subheader('Tatsächlicher Anlageneinsatz')
 
     if tes_used:
         # heatprod['Q_in_tes'] *= -1
@@ -242,18 +252,18 @@ with tab_unit:
     heatprod.index.names = ['Date']
     heatprod.reset_index(inplace=True)
 
-    hprod_melt = heatprod.melt('Date')
+    hprod_melt = heatprod[['Date'] + selection].melt('Date')
     hprod_melt.rename(
         columns={'variable': 'Versorgungsanlage'}, inplace=True
         )
 
-    st.altair_chart(
+    col_unit.altair_chart(
         alt.Chart(hprod_melt).mark_line().encode(
             y=alt.Y('value', title='Stündliche Wärmeproduktion in MWh'),
             x=alt.X('Date', title='Datum'),
             color=alt.Color('Versorgungsanlage').scale(
-                domain=[c for c in heatprod.columns if c != 'Date'],
-                range=[colors[c] for c in heatprod.columns if c != 'Date']
+                domain=selection,
+                range=[colors[s] for s in selection]
                 )
             ),
         use_container_width=True
