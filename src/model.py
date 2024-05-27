@@ -264,7 +264,7 @@ class EnergySystem():
             opt = appsi.solvers.Highs()
             opt.config.mip_gap = self.param_opt['MIPGap']
             opt.config.logfile = os.path.abspath(os.path.join(
-                os.path.dirname(__file__), 'highs_log.txt'
+                os.path.dirname(__file__), 'solverlogs', 'highs_log.txt'
                 ))
             # opt.config.stream_solver = True
             # opt.highs_options['output_flag'] = True
