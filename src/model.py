@@ -3,6 +3,7 @@ import os
 import oemof.solph as solph
 import pandas as pd
 from oemof.solph import views
+from pyomo.contrib import appsi
 
 
 class EnergySystem():
@@ -253,17 +254,27 @@ class EnergySystem():
         if self.param_opt['Solver'] == 'Gurobi':
             solver = 'gurobi'
             gapname = 'MIPGap'
+            self.model.solve(
+                solver=solver, solve_kwargs={'tee': True},
+                cmdline_options={gapname: self.param_opt['MIPGap']}
+                )
         elif self.param_opt['Solver'] == 'HiGHS':
             solver = 'highs'
             gapname = 'mip_rel_gap'
-        self.model.solve(
-            solver=solver, solve_kwargs={'tee': True},
-            cmdline_options={gapname: self.param_opt['MIPGap']}
-            )
+            opt = appsi.solvers.Highs()
+            opt.config.mip_gap = self.param_opt['MIPGap']
+            opt.config.logfile = os.path.abspath(os.path.join(
+                os.path.dirname(__file__), 'highs_log.txt'
+                ))
+            # opt.config.stream_solver = True
+            # opt.highs_options['output_flag'] = True
+            # opt.highs_options['log_to_console'] = True
+            opt.solve(self.model)
 
     def get_results(self):
         self.results = solph.processing.results(self.model)
-        self.meta_results = solph.processing.meta_results(self.model)
+        # breakpoint()
+        # self.meta_results = solph.processing.meta_results(self.model)
 
         data_gnw = views.node(self.results, 'gas network')['sequences']
         data_enw = views.node(self.results, 'electricity network')['sequences']
@@ -429,12 +440,12 @@ class EnergySystem():
             )
 
         # %% Meta results
-        self.key_params['objective'] = self.meta_results['objective']
-        self.key_params['gap'] = (
-            (self.meta_results['problem']['Lower bound']
-            - self.meta_results['objective'])
-            / self.meta_results['problem']['Lower bound'] * 100
-            )
+        # self.key_params['objective'] = self.meta_results['objective']
+        # self.key_params['gap'] = (
+        #     (self.meta_results['problem']['Lower bound']
+        #     - self.meta_results['objective'])
+        #     / self.meta_results['problem']['Lower bound'] * 100
+        #     )
 
         # %% Main economic results
         self.key_params['LCOH'] = LCOH(
