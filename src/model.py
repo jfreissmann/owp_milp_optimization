@@ -252,10 +252,17 @@ class EnergySystem():
     def solve_model(self):
         self.model = solph.Model(self.es)
 
-        logpath = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), 'solverlogs',
-            f'{self.param_opt["Solver"].lower()}_log.txt'
-            ))
+        solverlogspath = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), 'solverlogs')
+            )
+        if not os.path.exists(solverlogspath):
+            os.mkdir(solverlogspath)
+
+        logpath = os.path.abspath(
+            os.path.join(
+                solverlogspath, f'{self.param_opt["Solver"].lower()}_log.txt'
+                )
+            )
         if os.path.exists(logpath):
             os.remove(logpath)
 

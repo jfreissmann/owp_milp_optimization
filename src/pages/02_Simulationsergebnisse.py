@@ -385,12 +385,13 @@ if tes_used:
 
 with tab_pro:
     with tab_pro.expander('Solver Log'):
-        logpath = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '..', 'solverlogs',
-            f'{ss.param_opt["Solver"].lower()}_log.txt'
-            ))
+        logpath = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__), '..', 'solverlogs',
+                f'{ss.param_opt["Solver"].lower()}_log.txt'
+                )
+            )
         with open(logpath, 'r', encoding='utf-8') as file:
             solverlog = file.read()
 
-        # st.write(solverlog)
         st.text(solverlog)
