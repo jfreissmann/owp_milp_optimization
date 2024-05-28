@@ -77,21 +77,23 @@ chp_used = ('ice' in ss.param_units.keys()) or ('ccet' in ss.param_units.keys())
 
 if chp_used:
     if tes_used:
-        tab_ov, tab_unit, tab_el, tab_tes = st.tabs(
-            ['Überblick', 'Anlageneinsatz', 'Stromproduktion', 'Speicherstand']
+        tab_ov, tab_unit, tab_el, tab_tes, tab_pro = st.tabs([
+            'Überblick', 'Anlageneinsatz', 'Stromproduktion', 'Speicherstand',
+            'Erweitert'
+            ]
             )
     else:
-        tab_ov, tab_unit, tab_el = st.tabs(
-            ['Überblick', 'Anlageneinsatz', 'Stromproduktion']
+        tab_ov, tab_unit, tab_el, tab_pro = st.tabs(
+            ['Überblick', 'Anlageneinsatz', 'Stromproduktion', 'Erweitert']
             )
 else:
     if tes_used:
-        tab_ov, tab_unit, tab_tes = st.tabs(
-            ['Überblick', 'Anlageneinsatz', 'Speicherstand']
+        tab_ov, tab_unit, tab_tes, tab_pro = st.tabs(
+            ['Überblick', 'Anlageneinsatz', 'Speicherstand', 'Erweitert']
             )
     else:
-        tab_ov, tab_unit = st.tabs(
-            ['Überblick', 'Anlageneinsatz']
+        tab_ov, tab_unit, tab_pro = st.tabs(
+            ['Überblick', 'Anlageneinsatz', 'Erweitert']
             )
 
 # %% MARK: Overview
@@ -380,3 +382,15 @@ if tes_used:
                 ),
             use_container_width=True
             )
+
+with tab_pro:
+    with tab_pro.expander('Solver Log'):
+        logpath = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), '..', 'solverlogs',
+            f'{ss.param_opt["Solver"].lower()}_log.txt'
+            ))
+        with open(logpath, 'r', encoding='utf-8') as file:
+            solverlog = file.read()
+
+        # st.write(solverlog)
+        st.text(solverlog)
