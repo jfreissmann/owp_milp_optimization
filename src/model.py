@@ -251,21 +251,26 @@ class EnergySystem():
 
     def solve_model(self):
         self.model = solph.Model(self.es)
+
+        logpath = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), 'solverlogs',
+            f'{self.param_opt["Solver"].lower()}_log.txt'
+            ))
+        if os.path.exists(logpath):
+            os.remove(logpath)
+
         if self.param_opt['Solver'] == 'Gurobi':
-            solver = 'gurobi'
-            gapname = 'MIPGap'
             self.model.solve(
-                solver=solver, solve_kwargs={'tee': True},
-                cmdline_options={gapname: self.param_opt['MIPGap']}
+                solver='gurobi', solve_kwargs={'tee': True},
+                cmdline_options={
+                    'MIPGap': self.param_opt['MIPGap'],
+                    'LogFile': logpath
+                    }
                 )
         elif self.param_opt['Solver'] == 'HiGHS':
-            solver = 'highs'
-            gapname = 'mip_rel_gap'
             opt = appsi.solvers.Highs()
             opt.config.mip_gap = self.param_opt['MIPGap']
-            opt.config.logfile = os.path.abspath(os.path.join(
-                os.path.dirname(__file__), 'solverlogs', 'highs_log.txt'
-                ))
+            opt.config.logfile = logpath
             # opt.config.stream_solver = True
             # opt.highs_options['output_flag'] = True
             # opt.highs_options['log_to_console'] = True
