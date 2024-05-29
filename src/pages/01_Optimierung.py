@@ -119,6 +119,8 @@ param_overview.rename(
 col_over.dataframe(param_overview, use_container_width=True)
 
 # %% MARK: Save Data
+# _, col_save, col_reset, _ = st.columns([1.05, 1, 1, 2], gap='large')
+col_save, col_reset = col_over.columns([1, 1], gap='large')
 savepath = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..', 'save')
     )
@@ -127,9 +129,9 @@ if not os.path.exists(savepath):
     os.mkdir(savepath)
 
 download = False
-download = col_over.button(
+download = col_save.button(
     label='💾 Input Daten speichern',
-    key='download_button'
+    key='download_button', use_container_width=True
     )
 
 if download:
@@ -143,6 +145,28 @@ if download:
     unitpath = os.path.join(savepath, 'param_units.json')
     with open(unitpath, 'w', encoding='utf-8') as file:
         json.dump(ss.param_units, file, indent=4, sort_keys=True)
+
+reset_es = col_reset.button(
+    label='📝 Neues Energiesystem konfigurieren',
+    key='reset_button_overview',
+    use_container_width=True
+    )
+
+if reset_es:
+    keys = list(ss.keys())
+    exceptions = [
+        'all_heat_load',
+        'eco_data',
+        'all_el_prices',
+        'all_el_emissions',
+        'all_gas_prices',
+        'all_co2_prices',
+        'all_solar_heat_flow'
+        ]
+    for key in keys:
+        if key not in exceptions:
+            ss.pop(key)
+    st.switch_page('pages/00_Energiesystem.py')
 
 with st.container(border=True):
     opt = st.button(label='🖥️**Optimierung starten**', use_container_width=True)

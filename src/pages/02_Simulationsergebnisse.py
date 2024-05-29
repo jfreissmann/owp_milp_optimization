@@ -190,6 +190,30 @@ with tab_ov:
         round(ss.energy_system.key_params['Emissions OM (Spotmarket)']/1e3, 1)
         )
 
+    with st.container(border=True):
+    # st.markdown('---')
+        reset_es = st.button(
+            label='📝 **Neues Energiesystem konfigurieren**',
+            key='reset_button_results',
+            use_container_width=True
+            )
+
+        if reset_es:
+            keys = list(ss.keys())
+            exceptions = [
+                'all_heat_load',
+                'eco_data',
+                'all_el_prices',
+                'all_el_emissions',
+                'all_gas_prices',
+                'all_co2_prices',
+                'all_solar_heat_flow'
+                ]
+            for key in keys:
+                if key not in exceptions:
+                    ss.pop(key)
+            st.switch_page('pages/00_Energiesystem.py')
+
 # %% MARK: Unit Commitment
 with tab_unit:
     col_sel, col_unit = st.columns([1, 2], gap='large')
