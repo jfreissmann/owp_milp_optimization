@@ -122,10 +122,14 @@ with tab1:
 
     col_vis_unit, col_unit = st.columns([1, 2], gap='large')
 
+    if 'units' not in ss:
+        ss.units = []
+
     ss.units = col_unit.multiselect(
         'Wähle die Wärmeversorgungsanlagen aus, die im System verwendet werden '
         + 'können.',
-        list(shortnames.keys()),
+        options=list(shortnames.keys()),
+        default=ss.units,
         placeholder='Wärmeversorgungsanlagen'
         )
 
