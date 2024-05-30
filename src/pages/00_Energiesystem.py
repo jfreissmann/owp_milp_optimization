@@ -122,6 +122,10 @@ with tab1:
 
     col_vis_unit, col_unit = st.columns([1, 2], gap='large')
 
+    st.elements.utils._shown_default_value_warning=True
+
+    if 'units_multiselect' in ss:
+        ss.units_multiselect = ss.units_multiselect
     if 'units' not in ss:
         ss.units = []
 
@@ -130,7 +134,8 @@ with tab1:
         + 'können.',
         options=list(shortnames.keys()),
         default=ss.units,
-        placeholder='Wärmeversorgungsanlagen'
+        placeholder='Wärmeversorgungsanlagen',
+        key='units_multiselect'
         )
 
     ss.param_units = {
