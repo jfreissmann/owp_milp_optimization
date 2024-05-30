@@ -246,6 +246,25 @@ with tab_unit:
         placeholder='Wärmeversorgungsanlagen'
         )
 
+    dates = col_sel.date_input(
+        'Zeitraum auswählen:',
+        value=(
+            ss.energy_system.data_all.index[0],
+            ss.energy_system.data_all.index[-1]
+            ),
+        min_value=ss.energy_system.data_all.index[0],
+        max_value=ss.energy_system.data_all.index[-1],
+        format='DD.MM.YYYY', key='date_picker_heat_production'
+        )
+    dates = [
+        dt.datetime(year=d.year, month=d.month, day=d.day) for d in dates
+        ]
+    # Avoid error while only one date is picked
+    if len(dates) == 1:
+        dates.append(dates[0] + dt.timedelta(days=1))
+
+    heatprod = heatprod.loc[dates[0]:dates[1], :]
+
     heatprod_sorted = pd.DataFrame(
         np.sort(heatprod.values, axis=0)[::-1], columns=heatprod.columns
         )
