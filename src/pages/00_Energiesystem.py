@@ -599,7 +599,7 @@ with tab6:
         )
     ss.param_opt['MIPGap'] *= 1/100
 
-    ss.param_opt['TimeLimit'] = False
+    ss.param_opt['TimeLimit'] = None
     timelimit = col_opt.toggle(
         'Simulationsdauer begrenzen', key='ToggleTimeLimit'
         )
@@ -608,7 +608,8 @@ with tab6:
             'Zeitlimit in Minuten', value=ss.param_opt['TimeLimit'],
             key='TimeLimit'
             )
-        ss.param_opt['TimeLimit'] *= 60
+        if ss.param_opt['TimeLimit'] is not None:
+            ss.param_opt['TimeLimit'] *= 60
 
     st.markdown('''---''')
 

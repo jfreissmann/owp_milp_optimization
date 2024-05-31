@@ -267,17 +267,22 @@ class EnergySystem():
             os.remove(logpath)
 
         if self.param_opt['Solver'] == 'Gurobi':
-            self.model.solve(
-                solver='gurobi', solve_kwargs={'tee': True},
-                cmdline_options={
+            options = {
                     'MIPGap': self.param_opt['MIPGap'],
                     'LogFile': logpath
                     }
+            if self.param_opt['TimeLimit'] is not None:
+                options.update({'TimeLimit': self.param_opt['TimeLimit']})
+            self.model.solve(
+                solver='gurobi', solve_kwargs={'tee': True},
+                cmdline_options=options
                 )
         elif self.param_opt['Solver'] == 'HiGHS':
             opt = appsi.solvers.Highs()
             opt.config.mip_gap = self.param_opt['MIPGap']
             opt.config.logfile = logpath
+            if self.param_opt['TimeLimit'] is not None:
+                opt.config.time_limit = self.param_opt['TimeLimit']
             # opt.config.stream_solver = True
             # opt.highs_options['output_flag'] = True
             # opt.highs_options['log_to_console'] = True
