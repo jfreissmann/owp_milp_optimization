@@ -100,9 +100,21 @@ else:
 with tab_ov:
     # st.header('Überblick der Optimierungsergebnisse')
 
-    col_cap, col_sum = st.columns([1, 2], gap='large')
-
+    col_cap, col_sum = st.columns([2, 3], gap='large')
+    
     col_cap.subheader('Optimierte Anlagenkapazitäten')
+    col_cap1, col_cap2 = col_cap.columns([1, 1], gap='large')
+    
+    topopath = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), '..', 'img', 'es_topology_')
+        )
+    col_cap1.image(f'{topopath}header.png', use_column_width=True)
+    for unit in ss.units:
+        if ss.energy_system.data_caps.loc[0, f'cap_{shortnames[unit]}'] > 0:
+            col_cap1.image(
+                f'{topopath+shortnames[unit]}.png', use_column_width=True
+                )
+
     overview_caps = ss.energy_system.data_caps.copy()
     if tes_used:
         overview_caps.drop(columns=['cap_in_tes', 'cap_out_tes'], inplace=True)
@@ -119,7 +131,8 @@ with tab_ov:
     overview_caps.rename(index={0: 'Kapazität'}, inplace=True)
     overview_caps = overview_caps.apply(lambda x: round(x, 1))
 
-    col_cap.dataframe(overview_caps.T, use_container_width=True)
+    col_cap2.dataframe(overview_caps.T, use_container_width=True)
+
 
     col_sum.subheader('Wärmeproduktion')
     qsum = pd.DataFrame(columns=['unit', 'qsum'])
