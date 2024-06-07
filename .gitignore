@@ -162,3 +162,4 @@ cython_debug/
 # User saved data
 src/save/*
 src/solverlogs/*
+src/_tmp
