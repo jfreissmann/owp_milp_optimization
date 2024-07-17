@@ -156,6 +156,7 @@ with tab1:
 
     st.header('Eigenes Wärmeversorgungssystem laden')
 
+    own_es = False
     esfile = st.file_uploader(
         'Datei auswählen:', type='zip',
         help='Aktuell nicht vollständig funktionsfähig'
@@ -187,6 +188,7 @@ with tab1:
         ss.units = [longnames[u] for u in ss.param_units.keys()]
 
         shutil.rmtree(tmppath)
+        own_es = True
 
 # %% MARK: Unit Parameters
 with tab2:
@@ -574,13 +576,14 @@ with tab5:
         )
 
 # %% MARK: Aggregate Data
-ss.data = pd.concat(
-    [heat_load, el_prices['el_spot_price'], el_em['ef_om'],
-     gas_prices['gas_price'], co2_prices['co2_price']], axis=1
-    )
-if 'Solarthermie' in ss.units:
-    ss.data['solar_heat_flow'] = solar_heat_flow['solar_heat_flow']
-ss.data.set_index('Date', inplace=True, drop=True)
+if not own_es:
+    ss.data = pd.concat(
+        [heat_load, el_prices['el_spot_price'], el_em['ef_om'],
+        gas_prices['gas_price'], co2_prices['co2_price']], axis=1
+        )
+    if 'Solarthermie' in ss.units:
+        ss.data['solar_heat_flow'] = solar_heat_flow['solar_heat_flow']
+    ss.data.set_index('Date', inplace=True, drop=True)
 
 # %% MARK: Sonstiges
 with tab6:
