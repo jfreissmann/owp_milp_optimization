@@ -156,7 +156,10 @@ with tab1:
 
     st.header('Eigenes Wärmeversorgungssystem laden')
 
-    esfile = st.file_uploader('Datei auswählen:', type='zip')
+    esfile = st.file_uploader(
+        'Datei auswählen:', type='zip',
+        help='Aktuell nicht vollständig funktionsfähig'
+    )
     if esfile is not None:
         tmppath = os.path.abspath(
             os.path.join(
