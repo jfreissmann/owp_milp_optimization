@@ -1,6 +1,8 @@
 import datetime as dt
 import json
 import os
+import shutil
+import zipfile
 
 import altair as alt
 import pandas as pd
@@ -122,7 +124,7 @@ with tab1:
 
     col_vis_unit, col_unit = st.columns([1, 2], gap='large')
 
-    st.elements.utils._shown_default_value_warning=True
+    st.elements.utils._shown_default_value_warning = True
 
     if 'units_multiselect' in ss:
         ss.units_multiselect = ss.units_multiselect
@@ -151,6 +153,37 @@ with tab1:
             col_vis_unit.image(
                 f'{topopath+shortnames[unit]}.png', use_column_width=True
                 )
+
+    st.header('Eigenes Wärmeversorgungssystem laden')
+
+    esfile = st.file_uploader('Datei auswählen:', type='zip')
+    if esfile is not None:
+        tmppath = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__), '..', '_tmp'
+            )
+        )
+        if not os.path.exists(tmppath):
+            os.mkdir(tmppath)
+
+        zippath = os.path.join(tmppath, esfile.name.split('.')[0])
+        with zipfile.ZipFile(esfile, 'r') as z:
+            z.extractall(zippath)
+
+        tspath = os.path.join(zippath, 'data_input.csv')
+        ss.data = pd.read_csv(tspath, sep=';', index_col=0, parse_dates=True)
+
+        optpath = os.path.join(zippath, 'param_opt.json')
+        with open(optpath, 'r', encoding='utf-8') as file:
+            ss.param_opt = json.load(file)
+
+        unitpath = os.path.join(zippath, 'param_units.json')
+        with open(unitpath, 'r', encoding='utf-8') as file:
+            ss.param_units = json.load(file)
+
+        ss.units = [longnames[u] for u in ss.param_units.keys()]
+
+        shutil.rmtree(tmppath)
 
 # %% MARK: Unit Parameters
 with tab2:
