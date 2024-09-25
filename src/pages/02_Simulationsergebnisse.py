@@ -1,5 +1,6 @@
 import datetime as dt
 import os
+import re
 
 import altair as alt
 import numpy as np
@@ -72,8 +73,14 @@ with st.sidebar:
     st.image(logo_sw, use_column_width=True)
 
 # %% MARK: Main Window
-tes_used = 'tes' in ss.param_units.keys()
-chp_used = ('ice' in ss.param_units.keys()) or ('ccet' in ss.param_units.keys())
+tes_used = any(
+    [u.rstrip('0123456789') == 'tes' for u in ss.param_units.keys()]
+    )
+chp_used = (
+    any([u.rstrip('0123456789') == 'ice' for u in ss.param_units.keys()])
+    or any([u.rstrip('0123456789') == 'ccet' for u in ss.param_units.keys()])
+    )
+
 
 if chp_used:
     if tes_used:
@@ -101,31 +108,54 @@ with tab_ov:
     # st.header('Überblick der Optimierungsergebnisse')
 
     col_cap, col_sum = st.columns([2, 3], gap='large')
-    
+
     col_cap.subheader('Optimierte Anlagenkapazitäten')
     col_cap1, col_cap2 = col_cap.columns([1, 1], gap='large')
-    
+
+    # col_vis, col_nr = col_cap1.columns([0.85, 0.15])
     topopath = os.path.abspath(
         os.path.join(os.path.dirname(__file__), '..', 'img', 'es_topology_')
         )
     col_cap1.image(f'{topopath}header.png', use_column_width=True)
-    for unit in ss.units:
-        if ss.energy_system.data_caps.loc[0, f'cap_{shortnames[unit]}'] > 0:
+    # for unit in ss.units:
+    #     if ss.energy_system.data_caps.loc[0, f'cap_{shortnames[unit]}'] > 0:
+    #         col_cap1.image(
+    #             f'{topopath+shortnames[unit]}.png', use_column_width=True
+    #             )
+    for unit_cat in ss.units:
+        nr_unit_installed = 0
+        for unit in ss.param_units.keys():
+            if unit.rstrip('0123456789') == shortnames[unit_cat]:
+                if ss.energy_system.data_caps.loc[0, f'cap_{unit}'] > 0:
+                    nr_unit_installed += 1
+
+        if nr_unit_installed > 0:
+            # col_vis, col_nr = col_cap1.columns(
+            #     [0.85, 0.15], vertical_alignment='center'
+            #     )
             col_cap1.image(
-                f'{topopath+shortnames[unit]}.png', use_column_width=True
+                f'{topopath+shortnames[unit_cat]}.png', use_column_width=True
                 )
+
+            # col_nr.write(f'x{nr_unit_installed}')
 
     overview_caps = ss.energy_system.data_caps.copy()
     if tes_used:
-        overview_caps.drop(columns=['cap_in_tes', 'cap_out_tes'], inplace=True)
+        drop_cols = []
+        for col in overview_caps.columns:
+            if 'cap_in_tes' in col or 'cap_out_tes' in col:
+                drop_cols.append(col)
+        overview_caps.drop(columns=drop_cols, inplace=True)
     renamedict = {}
     for col in overview_caps.columns:
+        ucat = col.split('_')[-1].rstrip('0123456789')
+        unr = col.split('_')[-1][len(ucat):]
         if 'tes' in col:
-            renamedict[col] = longnames[col.split('_')[-1]] + ' (MWh)'
+            renamedict[col] = f'{longnames[ucat]} {unr} (MWh)'
         elif 'sol' in col:
-            renamedict[col] = longnames[col.split('_')[-1]] + ' (m²)'
+            renamedict[col] = f'{longnames[ucat]} {unr} (m²)'
         else:
-            renamedict[col] = longnames[col.split('_')[-1]] + ' (MW)'
+            renamedict[col] = f'{longnames[ucat]} {unr} (MW)'
 
     overview_caps.rename(columns=renamedict, inplace=True)
     overview_caps.rename(index={0: 'Kapazität'}, inplace=True)
@@ -137,21 +167,22 @@ with tab_ov:
     col_sum.subheader('Wärmeproduktion')
     qsum = pd.DataFrame(columns=['unit', 'qsum'])
     idx = 0
-    for unit in ss.units:
-        unit = shortnames[unit]
-        if unit == 'tes':
+    for unit in ss.param_units.keys():
+        ucat = unit.rstrip('0123456789')
+        unr = unit[len(ucat):]
+        if ucat == 'tes':
             tl = {'in': 'Ein', 'out': 'Aus'}
             for var in ['in', 'out']:
                 unit_col = f'Q_{var}_{unit}'
-                qsum.loc[idx, 'unit'] = longnames[unit] + ' ' + tl[var]
+                qsum.loc[idx, 'unit'] = f'{longnames[ucat]} {unr} {tl[var]}'
                 qsum.loc[idx, 'qsum'] = ss.energy_system.data_all[unit_col].sum()
                 idx += 1
         else:
-            if (unit == 'hp') or (unit == 'tes'):
+            if (ucat == 'hp') or (ucat == 'tes'):
                 unit_col = f'Q_out_{unit}'
             else:
                 unit_col = f'Q_{unit}'
-            qsum.loc[idx, 'unit'] = longnames[unit]
+            qsum.loc[idx, 'unit'] = f'{longnames[ucat]} {unr}'
             qsum.loc[idx, 'qsum'] = ss.energy_system.data_all[unit_col].sum()
             idx += 1
 
@@ -165,10 +196,17 @@ with tab_ov:
 
     st.subheader('Wirtschaftliche Kennzahlen')
     col_lcoh, col_cost = st.columns([1, 5])
-    col_lcoh.metric('LCOH in €/MWh', round(ss.energy_system.key_params['LCOH'], 2))
+    col_lcoh.metric(
+        'LCOH in €/MWh', round(ss.energy_system.key_params['LCOH'], 2)
+        )
 
     unit_cost = ss.energy_system.cost_df.copy()
-    unit_cost.rename(columns=longnames, inplace=True)
+    renamedict = {}
+    for unit in ss.param_units.keys():
+        ucat = unit.rstrip('0123456789')
+        unr = unit[len(ucat):]
+        renamedict[unit] = f'{longnames[ucat]} {unr}'
+    unit_cost.rename(columns=renamedict, inplace=True)
     unit_cost.rename(
         index={
             'invest': 'Investitionskosten',
@@ -237,19 +275,20 @@ with tab_unit:
     for col in ss.energy_system.data_all.columns:
         if 'Q_' in col:
             this_unit = None
-            for unit in ss.units:
-                unit = shortnames[unit]
+            for unit in ss.param_units.keys():
                 if unit in col:
                     this_unit = unit
+                    this_unit_cat = this_unit.rstrip('0123456789')
+                    this_unit_nr = this_unit[len(this_unit_cat):]
             if this_unit is None:
                 collabel = 'Wärmebedarf'
-            elif this_unit == 'tes':
+            elif this_unit.rstrip('0123456789') == 'tes':
                 if '_in' in col:
-                    collabel = longnames[this_unit] + ' Ein'
+                    collabel = f'{longnames[this_unit_cat]} {this_unit_nr} Ein'
                 elif '_out' in col:
-                    collabel = longnames[this_unit] + ' Aus'
+                    collabel = f'{longnames[this_unit_cat]} {this_unit_nr} Aus'
             else:
-                collabel = longnames[this_unit]
+                collabel = f'{longnames[this_unit_cat]} {this_unit_nr}'
             heatprod[collabel] = ss.energy_system.data_all[col].copy()
 
     selection = col_sel.multiselect(
@@ -295,7 +334,7 @@ with tab_unit:
             x=alt.X('Stunde', title='Stunden'),
             color=alt.Color('Versorgungsanlage').scale(
                 domain=selection,
-                range=[colors[s] for s in selection]
+                range=[colors[re.sub(r'\s\d', '', s)] for s in selection]
                 )
             ),
         use_container_width=True
@@ -304,8 +343,9 @@ with tab_unit:
     col_unit.subheader('Tatsächlicher Anlageneinsatz')
 
     if tes_used:
-        # heatprod['Q_in_tes'] *= -1
-        heatprod['Wärmespeicher Ein'] *= -1
+        for col in heatprod.columns:
+            if 'Wärmespeicher' in col and 'Ein' in col:
+                heatprod[col] *= -1
     # heatprod.drop('Wärmebedarf', axis=1, inplace=True)
     heatprod.index.names = ['Date']
     heatprod.reset_index(inplace=True)
@@ -321,7 +361,7 @@ with tab_unit:
             x=alt.X('Date', title='Datum'),
             color=alt.Color('Versorgungsanlage').scale(
                 domain=selection,
-                range=[colors[s] for s in selection]
+                range=[colors[re.sub(r'\s\d', '', s)] for s in selection]
                 )
             ),
         use_container_width=True
@@ -406,38 +446,52 @@ if tes_used:
         if len(dates) == 1:
             dates.append(dates[0] + dt.timedelta(days=1))
 
-        tesdata = ss.energy_system.data_all.loc[
-            dates[0]:dates[1], ['storage_content_tes', 'Q_in_tes', 'Q_out_tes']
-            ].copy()
-        tesdata['Q_in_tes'] *= -1
-        tesdata.rename(
-            columns={
-                'Q_in_tes': 'Wärmespeicher Ein',
-                'Q_out_tes': 'Wärmespeicher Aus'},
-            inplace=True
-            )
-        tesdata.index.names = ['Date']
-        tesdata.reset_index(inplace=True)
+        for unit in ss.param_units.keys():
+            ucat = unit.rstrip('0123456789')
+            unr = unit[len(ucat):]
 
-        col_tes.altair_chart(
-            alt.Chart(tesdata).mark_line(color='#EC6707').encode(
-                y=alt.Y('storage_content_tes', title='Speicherstand in MWh'),
-                x=alt.X('Date', title='Datum'),
-                ),
-            use_container_width=True
-            )
+            if ucat == 'tes':
+                tesdata = ss.energy_system.data_all.loc[
+                    dates[0]:dates[1],
+                    [f'storage_content_{unit}', f'Q_in_{unit}', f'Q_out_{unit}']
+                    ].copy()
+                tesdata[f'Q_in_{unit}'] *= -1
+                tesdata.rename(
+                    columns={
+                        f'Q_in_{unit}': f'Wärmespeicher {unr} Ein',
+                        f'Q_out_{unit}': f'Wärmespeicher {unr} Aus'},
+                    inplace=True
+                    )
+                tesdata.index.names = ['Date']
+                tesdata.reset_index(inplace=True)
 
-        domain = ['Wärmespeicher Aus', 'Wärmespeicher Ein']
-        col_tes.altair_chart(
-            alt.Chart(tesdata[['Date', *domain]].melt('Date')).mark_bar(size=0.5).encode(
-                y=alt.Y('value', title='Speicherbe- & -entladung in MWh'),
-                x=alt.X('Date', title='Datum'),
-                color=alt.Color('variable').scale(
-                    domain=domain, range=[colors[d] for d in domain]
-                    ).legend(None)
-                ),
-            use_container_width=True
-            )
+                col_tes.subheader(f'Wärmespeicher {unr}')
+
+                col_tes.altair_chart(
+                    alt.Chart(tesdata).mark_line(color='#EC6707').encode(
+                        y=alt.Y(
+                            f'storage_content_{unit}',
+                            title='Speicherstand in MWh'
+                            ),
+                        x=alt.X('Date', title='Datum'),
+                        ),
+                    use_container_width=True
+                    )
+
+                domain = [
+                    f'Wärmespeicher {unr} Aus', f'Wärmespeicher {unr} Ein'
+                    ]
+                col_tes.altair_chart(
+                    alt.Chart(tesdata[['Date', *domain]].melt('Date')).mark_bar(size=0.5).encode(
+                        y=alt.Y('value', title='Speicherbe- & -entladung in MWh'),
+                        x=alt.X('Date', title='Datum'),
+                        color=alt.Color('variable').scale(
+                            domain=domain,
+                            range=[colors[re.sub(r'\s\d', '', d)] for d in domain]
+                            ).legend(None)
+                        ),
+                    use_container_width=True
+                    )
 
 with tab_pro:
     with tab_pro.expander('Solver Log'):

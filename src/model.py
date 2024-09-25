@@ -14,10 +14,18 @@ class EnergySystem():
         self.param_units = param_units
         self.param_opt = param_opt
 
-        self.tes_used = 'tes' in self.param_units.keys()
+        self.tes_used = any(
+            [u.rstrip('0123456789') == 'tes' for u in self.param_units.keys()]
+            )
         self.chp_used = (
-            ('ice' in self.param_units.keys())
-            or ('ccet' in self.param_units.keys())
+            any([
+                u.rstrip('0123456789') == 'ice'
+                for u in self.param_units.keys()
+                ])
+            or any([
+                u.rstrip('0123456789') == 'ccet'
+                for u in self.param_units.keys()
+                ])
             )
 
         self.periods = len(data.index)
@@ -72,26 +80,27 @@ class EnergySystem():
 
         self.es.add(self.comps['gas_source'], self.comps['elec_source'])
 
-        if 'sol' in self.param_units.keys():
-            self.comps['solar_source'] = solph.components.Source(
-                label='solar thermal',
-                outputs={
-                    self.buses['hnw']: solph.flows.Flow(
-                        variable_costs=self.param_units['sol']['op_cost_var'],
-                        nominal_value=solph.Investment(
-                            ep_costs=(
-                                self.param_units['sol']['inv_spez']
-                                / self.bwsf
+        for unit, unit_params in self.param_units.items():
+            if unit.rstrip('0123456789') == 'sol':
+                self.comps[unit] = solph.components.Source(
+                    label=unit,
+                    outputs={
+                        self.buses['hnw']: solph.flows.Flow(
+                            variable_costs=unit_params['op_cost_var'],
+                            nominal_value=solph.Investment(
+                                ep_costs=(
+                                    unit_params['inv_spez']
+                                    / self.bwsf
+                                    ),
+                                maximum=unit_params['A_max'],
+                                minimum=unit_params['A_min']
                                 ),
-                            maximum=self.param_units['sol']['A_max'],
-                            minimum=self.param_units['sol']['A_min']
-                            ),
-                        fix=self.data['solar_heat_flow']
-                        )
-                    }
-                )
+                            fix=self.data['solar_heat_flow']
+                            )
+                        }
+                    )
 
-            self.es.add(self.comps['solar_source'])
+                self.es.add(self.comps[unit])
 
     def generate_sinks(self):
 
@@ -122,7 +131,9 @@ class EnergySystem():
     def generate_components(self):
         internal_el = False
         for unit in self.param_units.keys():
-            if unit in ['ccet', 'ice']:
+            unit_cat = unit.rstrip('0123456789')
+            unit_nr = unit[len(unit_cat):]
+            if unit_cat in ['ccet', 'ice']:
                 self.comps[unit] = solph.components.Converter(
                     label=unit,
                     inputs={self.buses['gnw']: solph.flows.Flow()},
@@ -153,22 +164,22 @@ class EnergySystem():
                 self.es.add(self.comps[unit])
                 internal_el = True
 
-            if unit in ['hp', 'plb', 'eb']:
-                if unit == 'hp':
+            if unit_cat in ['hp', 'plb', 'eb']:
+                if unit_cat == 'hp':
                     eff = 'cop'
                     input_nw = 'enw'
                     var_cost = (
                         self.param_units[unit]['op_cost_var']
                         + self.param_opt['elec_consumer_charges_self']
                         )
-                elif unit == 'plb':
+                elif unit_cat == 'plb':
                     eff = 'eta'
                     input_nw = 'gnw'
                     var_cost = (
                         self.param_units[unit]['op_cost_var']
                         + self.param_opt['energy_tax']
                         )
-                elif unit == 'eb':
+                elif unit_cat == 'eb':
                     eff = 'eta'
                     input_nw = 'enw'
                     var_cost = (
@@ -202,7 +213,7 @@ class EnergySystem():
 
                 self.es.add(self.comps[unit])
 
-            if unit == 'tes':
+            if unit_cat == 'tes':
                 self.comps[unit] = solph.components.GenericStorage(
                     label=unit,
                     investment=solph.Investment(
@@ -300,13 +311,28 @@ class EnergySystem():
         if self.chp_used:
             data_chpnode = views.node(self.results, 'chp node')['sequences']
 
-        data_hnw_caps = views.node(self.results, 'heat network')['scalars']
+        self.data_caps = views.node(self.results, 'heat network')['scalars']
+
+        # breakpoint()
 
         if self.tes_used:
-            data_tes = views.node(self.results, 'tes')['sequences']
-            data_tes_cap = views.node(self.results, 'tes')['scalars'][
-                (('tes', 'None'), 'invest')
-                ]
+            data_tes = None
+            for unit in self.param_units.keys():
+                if unit.rstrip('0123456789') == 'tes':
+                    next_data_tes = views.node(self.results, unit)['sequences']
+                    next_cap_tes = views.node(self.results, unit)['scalars'][
+                        ((unit, 'None'), 'invest')
+                        ]
+                    if data_tes is None:
+                        data_tes = next_data_tes
+                    else:
+                        data_tes = pd.concat([data_tes, next_data_tes], axis=1)
+                    self.data_caps = pd.concat([
+                        self.data_caps,
+                        pd.Series(
+                            next_cap_tes, index=[((unit, 'None'), 'invest')]
+                            )
+                        ])
 
         # Combine all data and relabel the column names
         self.data_all = pd.concat([data_gnw, data_enw, data_hnw], axis=1)
@@ -317,21 +343,12 @@ class EnergySystem():
         if self.data_all.iloc[-1, :].isna().values.all():
             self.data_all.drop(self.data_all.tail(1).index, inplace=True)
 
-        ldpath = os.path.abspath(
-            os.path.join(
-                os.path.dirname(__file__), 'input', 'labeldict.csv'
-                )
-            )
-
-        result_labeling(self.data_all, labeldictpath=ldpath)
+        result_labeling(self.data_all)
         self.data_all = self.data_all.loc[
             :, ~self.data_all.columns.duplicated()
             ].copy()
 
-        self.data_caps = data_hnw_caps
-        if self.tes_used:
-            self.data_caps['cap_tes'] = data_tes_cap
-        result_labeling(self.data_caps, labeldictpath=ldpath)
+        result_labeling(self.data_caps)
 
         for col in self.data_all.columns:
             if ('status' in col[-1]) or ('state' in col):
@@ -363,19 +380,20 @@ class EnergySystem():
 
     def calc_econ_params(self):
         for unit in self.param_units.keys():
+            unit_cat = unit.rstrip('0123456789')
             unit_E_N = self.data_caps.loc[0, f'cap_{unit}']
             add_cost = 0
 
-            if unit == 'plb':
+            if unit_cat == 'plb':
                 add_cost = self.param_opt['energy_tax']
                 E_N_label = f'Q_{unit}'
-            elif unit == 'eb':
+            elif unit_cat == 'eb':
                 E_N_label = f'Q_{unit}'
-            elif unit == 'hp':
+            elif unit_cat == 'hp':
                 E_N_label = f'Q_out_{unit}'
-            elif unit == 'tes':
+            elif unit_cat == 'tes':
                 E_N_label = f'Q_in_{unit}'
-            elif unit in ['ccet', 'ice']:
+            elif unit_cat in ['ccet', 'ice']:
                 E_N_label = f'P_{unit}'
                 unit_E_N = (
                     unit_E_N / self.param_units[unit]['eta_th']
@@ -594,7 +612,7 @@ def calc_cost(label, E_N, param, uc, cost_df, add_var_cost=None):
 
     return cost_df
 
-def result_labeling(df, labeldictpath='labeldict.csv'):
+def result_labeling(df, debug=True, **kwargs):
     """
     Relabel the column names of oemof.solve result dataframes.
 
@@ -603,30 +621,148 @@ def result_labeling(df, labeldictpath='labeldict.csv'):
 
     df : pandas.DataFrame
         DataFrame containing the results whose column names should be relabeled.
-    
-    labeldictpath : str
-        Relative path to the labeldict csv file. Defaults to a path in the same
-        directory.
     """
-    labeldict_csv = pd.read_csv(labeldictpath, sep=';', na_filter=False)
-
-    labeldict = dict()
-    for idx in labeldict_csv.index:
-        labeldict[
-            ((labeldict_csv.loc[idx, 'name_out'],
-              labeldict_csv.loc[idx, 'name_in']),
-              labeldict_csv.loc[idx, 'type'])
-            ] = labeldict_csv.loc[idx, 'label']
-
+    labeldict = {}
     if isinstance(df, pd.DataFrame):
         for col in df.columns:
-            if col in labeldict.keys():
-                df.rename(columns={col: labeldict[col]}, inplace=True)
-            else:
-                print(f'Column name "{col}" not in "{labeldictpath}".')
+            if not isinstance(col, tuple):
+                if debug:
+                    print(f'Edge "{col}" was skipped while labeling.')
+                continue
+            labeldict[col] = check_column(col, debug)
+        df.rename(columns=labeldict, inplace=True)
+
     elif isinstance(df, pd.Series):
-        for idx in df.index:
-            if idx in labeldict.keys():
-                df.rename(index={idx: labeldict[idx]}, inplace=True)
-            else:
-                print(f'Column name "{idx}" not in "{labeldictpath}".')
+        for col in df.index:
+            if not isinstance(col, tuple):
+                if debug:
+                    print(f'Edge "{col}" was skipped while labeling.')
+                continue
+            labeldict[col] = check_column(col, debug)
+        df.rename(index=labeldict, inplace=True)
+
+def check_column(col, debug):
+    if col[0][1] == 'heat network':
+        if col[0][0].rstrip('0123456789') == 'hp':
+            if col[1] == 'flow':
+                return f'Q_out_{col[0][0]}'
+            elif col[1] == 'invest':
+                return f'cap_{col[0][0]}'
+            elif col[1] == 'status':
+                return f'state_{col[0][0]}'
+            elif col[1] == 'status_nominal':
+                return f'state_nom_{col[0][0]}'
+        elif col[0][0].rstrip('0123456789') == 'tes':
+            if col[1] == 'flow':
+                return f'Q_out_{col[0][0]}'
+            elif col[1] == 'invest':
+                return f'cap_out_{col[0][0]}'
+            elif col[1] == 'status':
+                return f'state_out_{col[0][0]}'
+            elif col[1] == 'status_nominal':
+                return f'state_nom_out_{col[0][0]}'
+            elif col[1] == 'total':
+                return f'total_out_{col[0][0]}'
+        else:
+            if col[1] == 'flow':
+                return f'Q_{col[0][0]}'
+            elif col[1] == 'invest':
+                return f'cap_{col[0][0]}'
+            elif col[1] == 'status':
+                return f'state_{col[0][0]}'
+            elif col[1] == 'status_nominal':
+                return f'state_nom_{col[0][0]}'
+
+    elif col[0][0] == 'heat network':
+        if col[0][1].rstrip('0123456789') == 'tes':
+            if col[1] == 'flow':
+                return f'Q_in_{col[0][1]}'
+            elif col[1] == 'invest':
+                return f'cap_in_{col[0][1]}'
+            elif col[1] == 'status':
+                return f'state_in_{col[0][1]}'
+            elif col[1] == 'status_nominal':
+                return f'state_nom_in_{col[0][1]}'
+            elif col[1] == 'total':
+                return f'total_in_{col[0][1]}'
+        elif col[0][1] == 'heat demand':
+            return 'Q_demand'
+
+    elif col[0][1] == 'chp node':
+        if col[1] == 'flow':
+            return f'P_{col[0][0]}'
+
+    elif col[0][0] == 'electricity network':
+        if col[0][1].rstrip('0123456789') == 'hp':
+            if col[1] == 'flow':
+                return f'P_in_{col[0][1]}'
+            elif col[1] == 'status':
+                return f'state_{col[0][1]}'
+        else:
+            return f'P_{col[0][1]}'
+
+    elif col[0][0] == 'gas network':
+        return f'H_{col[0][1]}'
+
+    elif col[0][0] == 'chp node':
+        if col[0][1] == 'spotmarket':
+            return 'P_spotmarket'
+        elif col[0][1] == 'chp internal':
+            return 'P_internal'
+
+    elif col[0][0] == 'chp internal':
+        if col[0][1] == 'electricity network':
+            return 'P_internal'
+
+    elif col[0][0] == 'gas source':
+        return 'H_source'
+
+    elif col[0][0] == 'electricity source':
+        return 'P_source'
+
+    elif col[0][0].rstrip('0123456789') == 'tes' and col[0][1] == 'None':
+        if col[1] == 'storage_content':
+            return f'storage_content_{col[0][0]}'
+        elif col[1] == 'invest':
+            return f'cap_{col[0][0]}'
+
+    else:
+        if debug:
+            print(f'Edge "{col}" could not be labeled.')
+
+# def result_labeling(df, labeldictpath='labeldict.csv'):
+#     """
+#     Relabel the column names of oemof.solve result dataframes.
+
+#     Parameters
+#     ----------
+
+#     df : pandas.DataFrame
+#         DataFrame containing the results whose column names should be relabeled.
+    
+#     labeldictpath : str
+#         Relative path to the labeldict csv file. Defaults to a path in the same
+#         directory.
+#     """
+#     labeldict_csv = pd.read_csv(labeldictpath, sep=';', na_filter=False)
+
+#     labeldict = dict()
+#     for idx in labeldict_csv.index:
+#         labeldict[
+#             ((labeldict_csv.loc[idx, 'name_out'],
+#               labeldict_csv.loc[idx, 'name_in']),
+#               labeldict_csv.loc[idx, 'type'])
+#             ] = labeldict_csv.loc[idx, 'label']
+
+#     if isinstance(df, pd.DataFrame):
+#         for col in df.columns:
+#             if col in labeldict.keys():
+#                 df.rename(columns={col: labeldict[col]}, inplace=True)
+#             else:
+#                 print(f'Column name "{col}" not in "{labeldictpath}".')
+#     elif isinstance(df, pd.Series):
+#         for idx in df.index:
+#             if idx in labeldict.keys():
+#                 df.rename(index={idx: labeldict[idx]}, inplace=True)
+#             else:
+#                 print(f'Column name "{idx}" not in "{labeldictpath}".')

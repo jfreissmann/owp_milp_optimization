@@ -3,6 +3,7 @@ import json
 import os
 import shutil
 import zipfile
+from copy import deepcopy
 
 import altair as alt
 import pandas as pd
@@ -122,9 +123,9 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
 with tab1:
     st.header('Auswahl des Wärmeversorgungssystem')
 
-    col_vis_unit, col_unit = st.columns([1, 2], gap='large')
+    col_system, col_unit = st.columns([1, 2], gap='large')
 
-    st.elements.utils._shown_default_value_warning = True
+    # st.elements.utils._shown_default_value_warning = True
 
     if 'param_units' not in ss:
         ss.param_units = {}
@@ -144,19 +145,38 @@ with tab1:
         key='units_multiselect'
         )
 
-    ss.param_units = {
-        u: params for u, params in ss.param_units_all.items() if longnames[u] in ss.units
-        }
+    col_vis_unit, col_nr_unit = col_system.columns([0.8, 0.2])
 
     topopath = os.path.abspath(
         os.path.join(os.path.dirname(__file__), '..', 'img', 'es_topology_')
         )
     col_vis_unit.image(f'{topopath}header.png', use_column_width=True)
+    if 'nr_units' not in ss:
+        ss.nr_units = {}
     if ss.units:
         for unit in ss.units:
+            col_vis_unit, col_nr_unit = col_system.columns(
+                [0.8, 0.2], vertical_alignment='center'
+            )
             col_vis_unit.image(
                 f'{topopath+shortnames[unit]}.png', use_column_width=True
                 )
+
+            if unit in ss.nr_units:
+                init_nr_units = ss.nr_units[unit]
+            else:
+                init_nr_units = 1
+
+            ss.nr_units[unit] = col_nr_unit.number_input(
+                f'Anzahl {unit}', value=init_nr_units, 
+                min_value=1, max_value=99, step=1,
+                label_visibility='collapsed'
+            )
+
+        for u, params in ss.param_units_all.items():
+            if longnames[u] in ss.units:
+                for i in range(1, ss.nr_units[longnames[u]]+1):
+                    ss.param_units[f'{u}{i}'] = deepcopy(params)
 
     st.header('Eigenes Wärmeversorgungssystem laden')
 
@@ -198,60 +218,63 @@ with tab1:
 with tab2:
     st.header('Parametrisierung der Wärmeversorgungsanlagen')
 
-    for unit in ss.units:
-        params = ss.param_units[shortnames[unit]]
-        with st.expander(unit):
+    for unit, unit_params in ss.param_units.items():
+        unit_cat = unit.rstrip('0123456789')
+        unit_nr = unit[len(unit_cat):]
+
+        with st.expander(f'{longnames[unit_cat]} {unit_nr}'):
             col_tech, col_econ = st.columns(2, gap='large')
 
             col_tech.subheader('Technische Parameter')
             for uinput, uinfo in ss.unit_inputs['Technische Parameter'].items():
-                if uinput in ss.param_units[shortnames[unit]]:
+                if uinput in unit_params:
                     if uinput == 'balanced':
-                        ss.param_units[shortnames[unit]][uinput] = col_tech.toggle(
+                        unit_params[uinput] = col_tech.toggle(
                             uinfo['name'],
-                            value=ss.param_units[shortnames[unit]][uinput]
+                            value=unit_params[uinput],
+                            key=f'toggle_balanced_tes{unit_nr}'
                         )
                     else:
                         if uinfo['unit'] == '%':
-                            ss.param_units[shortnames[unit]][uinput] *= 100
+                            unit_params[uinput] *= 100
                         if uinfo['unit'] == '':
                             label = uinfo['name']
                         else:
                             label = f"{uinfo['name']} in {uinfo['unit']}"
-                        ss.param_units[shortnames[unit]][uinput] = (
+                        unit_params[uinput] = (
                             col_tech.number_input(
                                 label,
                                 value=float(
-                                    ss.param_units[shortnames[unit]][uinput]
+                                    unit_params[uinput]
                                     ),
                                 min_value=uinfo['min'],
                                 max_value=uinfo['max'],
                                 step=(uinfo['max']-uinfo['min'])/100,
-                                key=f'input_{shortnames[unit]}_{uinput}'
+                                key=f'input_{unit}_{uinput}'
                                 )
                             )
                         if uinfo['unit'] == '%':
-                            ss.param_units[shortnames[unit]][uinput] /= 100
+                            unit_params[uinput] /= 100
 
             col_econ.subheader('Ökonomische Parameter')
             for uinput, uinfo in ss.unit_inputs['Ökonomische Parameter'].items():
-                if uinput in ss.param_units[shortnames[unit]]:
+                if uinput in unit_params:
                     if unit == 'Solarthermie':
                         label = f"{uinfo['name']} in €/m²"
                     elif unit == 'Wärmespeicher':
                         label = f"{uinfo['name']} in €/MWh"
                     else:
                         label = f"{uinfo['name']} in {uinfo['unit']}"
-                    ss.param_units[shortnames[unit]][uinput] = (
+                    unit_params[uinput] = (
                         col_econ.number_input(
                             label,
                             value=float(
-                                ss.param_units[shortnames[unit]][uinput]
+                                unit_params[uinput]
                                 ),
                             min_value=uinfo['min'],
                             max_value=uinfo['max'],
                             step=(uinfo['max']-uinfo['min'])/100,
-                            key=f'input_{shortnames[unit]}_{uinput}'
+                            key=f'input_{unit}_{uinput}'
                             )
                         )
 
