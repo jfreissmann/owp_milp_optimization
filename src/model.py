@@ -313,8 +313,6 @@ class EnergySystem():
 
         self.data_caps = views.node(self.results, 'heat network')['scalars']
 
-        # breakpoint()
-
         if self.tes_used:
             data_tes = None
             for unit in self.param_units.keys():
@@ -359,6 +357,10 @@ class EnergySystem():
         for col in self.data_caps.columns:
             if ('total' in str(col)) or ('0' in str(col)):
                 self.data_caps.drop(columns=col, inplace=True)
+        if None in self.data_all.columns:
+            self.data_all.drop(columns=[None], inplace=True)
+        if None in self.data_caps.columns:
+            self.data_caps.drop(columns=[None], inplace=True)
 
         try:
             self.data_all = self.data_all.reindex(
