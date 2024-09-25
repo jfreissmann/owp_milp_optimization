@@ -105,10 +105,11 @@ else:
 
 # %% MARK: Overview
 with tab_ov:
-    col_cap, col_sum = st.columns([2, 3], gap='large')
+    # col_cap, col_sum = st.columns([2, 3], gap='large')
+    col_cap, col_sum = st.columns([3, 2], gap='large')
 
     col_cap.subheader('Optimierte Anlagenkapazitäten')
-    col_cap1, col_cap2 = col_cap.columns([1, 1], gap='large')
+    col_cap1, col_cap2 = col_cap.columns([2, 3], gap='large')
 
     topopath = os.path.abspath(
         os.path.join(os.path.dirname(__file__), '..', 'img', 'es_topology_')
@@ -172,7 +173,7 @@ with tab_ov:
 
     col_sum.altair_chart(
         alt.Chart(qsum).mark_bar(color='#B54036').encode(
-            y=alt.Y('unit', title='Versorgungsanlage'),
+            y=alt.Y('unit', title=None),
             x=alt.X('qsum', title='Gesamtwärmebereitstellung in MWh')
             ),
         use_container_width=True
