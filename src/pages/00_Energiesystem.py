@@ -475,19 +475,18 @@ with tab4:
                 + 'Daten angleichen.'
                 )
 
-    col_elp.subheader('Strompreisbestandteile')
+    col_elp.subheader('Strompreisbestandteile in ct/kWh')
     col_elp.dataframe(
-        {f'{k} in ct/kWh': v
-         for k, v in ss.bound_inputs[str(el_prices_year)].items()},
+        {k: v for k, v in ss.bound_inputs[str(el_prices_year)].items()},
         use_container_width=True
         )
 
     cons_charger = ss.bound_inputs[str(el_prices_year)]
     ss.param_opt['elec_consumer_charges_grid'] = round(sum(
-        val*10 for val in cons_charger['Stromkosten (extern)'].values()
+        val*10 for val in cons_charger['Netzbezug'].values()
         ), 2)
     ss.param_opt['elec_consumer_charges_self'] = round(sum(
-        val*10 for val in cons_charger['Stromkosten (intern)'].values()
+        val*10 for val in cons_charger['Eigennutzung'].values()
         ), 2)
 
 
