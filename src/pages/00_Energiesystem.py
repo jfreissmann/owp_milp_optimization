@@ -126,8 +126,13 @@ with tab1:
 
     st.elements.utils._shown_default_value_warning = True
 
-    if 'units_multiselect' in ss:
-        ss.units_multiselect = ss.units_multiselect
+    if 'param_units' not in ss:
+        ss.param_units = {}
+    if 'units_multiselect' not in ss:
+        if 'units' in ss:
+            ss.units_multiselect = ss.units
+        else:
+            ss.units_multiselect = []
     if 'units' not in ss:
         ss.units = []
 
@@ -135,7 +140,6 @@ with tab1:
         'Wähle die Wärmeversorgungsanlagen aus, die im System verwendet werden '
         + 'können.',
         options=list(shortnames.keys()),
-        default=ss.units,
         placeholder='Wärmeversorgungsanlagen',
         key='units_multiselect'
         )
