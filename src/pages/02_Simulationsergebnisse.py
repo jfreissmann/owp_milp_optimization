@@ -105,39 +105,23 @@ else:
 
 # %% MARK: Overview
 with tab_ov:
-    # st.header('Überblick der Optimierungsergebnisse')
-
     col_cap, col_sum = st.columns([2, 3], gap='large')
 
     col_cap.subheader('Optimierte Anlagenkapazitäten')
     col_cap1, col_cap2 = col_cap.columns([1, 1], gap='large')
 
-    # col_vis, col_nr = col_cap1.columns([0.85, 0.15])
     topopath = os.path.abspath(
         os.path.join(os.path.dirname(__file__), '..', 'img', 'es_topology_')
         )
     col_cap1.image(f'{topopath}header.png', use_column_width=True)
-    # for unit in ss.units:
-    #     if ss.energy_system.data_caps.loc[0, f'cap_{shortnames[unit]}'] > 0:
-    #         col_cap1.image(
-    #             f'{topopath+shortnames[unit]}.png', use_column_width=True
-    #             )
-    for unit_cat in ss.units:
-        nr_unit_installed = 0
-        for unit in ss.param_units.keys():
-            if unit.rstrip('0123456789') == shortnames[unit_cat]:
-                if ss.energy_system.data_caps.loc[0, f'cap_{unit}'] > 0:
-                    nr_unit_installed += 1
 
-        if nr_unit_installed > 0:
-            # col_vis, col_nr = col_cap1.columns(
-            #     [0.85, 0.15], vertical_alignment='center'
-            #     )
+    for unit in ss.param_units.keys():
+        if ss.energy_system.data_caps.loc[0, f'cap_{unit}'] > 0:
+            unit_cat = unit.rstrip('0123456789')
+
             col_cap1.image(
-                f'{topopath+shortnames[unit_cat]}.png', use_column_width=True
+                f'{topopath+unit_cat}.png', use_column_width=True
                 )
-
-            # col_nr.write(f'x{nr_unit_installed}')
 
     overview_caps = ss.energy_system.data_caps.copy()
     if tes_used:

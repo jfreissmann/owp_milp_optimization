@@ -102,33 +102,12 @@ topopath = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..', 'img', 'es_topology_')
     )
 
-# Variant 1: Old style, only one pic per unit categorie
-# col_es.image(f'{topopath}header.png', use_column_width=True)
-# for unit in ss.units:
-#     col_es.image(
-#         f'{topopath+shortnames[unit]}.png', use_column_width=True
-#         )
-# Variant 2: Only one pic per unit categorie, with amount to the side
-col_vis, col_nr = col_es.columns([0.85, 0.15])
-col_vis.image(f'{topopath}header.png', use_column_width=True)
-for unit in ss.units:
-    col_vis, col_nr = col_es.columns([0.85, 0.15], vertical_alignment='center')
-    col_vis.image(
-        f'{topopath+shortnames[unit]}.png', use_column_width=True
+col_es.image(f'{topopath}header.png', use_column_width=True)
+for unit in ss.param_units.keys():
+    unit = unit.rstrip('0123456789')
+    col_es.image(
+        f'{topopath+unit}.png', use_column_width=True
         )
-
-    ucount = 0
-    for u in ss.param_units.keys():
-        if shortnames[unit] == u.rstrip('0123456789'):
-            ucount += 1
-    col_nr.write(f'x{ucount}')
-# Variant 3: One pic for each unit
-# col_es.image(f'{topopath}header.png', use_column_width=True)
-# for unit in ss.param_units.keys():
-#     unit = unit.rstrip('0123456789')
-#     col_es.image(
-#         f'{topopath+unit}.png', use_column_width=True
-#         )
 
 col_over.subheader('Zeitreihen im Wärmeversorgungssystem')
 
