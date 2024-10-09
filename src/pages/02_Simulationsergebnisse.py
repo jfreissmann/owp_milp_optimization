@@ -1,5 +1,7 @@
 import datetime as dt
+import json
 import os
+import shutil
 import re
 
 import altair as alt
@@ -7,6 +9,67 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 from streamlit import session_state as ss
+
+@st.dialog('Ergebnisse lokal speichern')
+def save_results():
+    """Temporarely save results and zip them, then let user download it."""
+    with st.spinner('Daten werden verarbeitet...'):
+        tmppath = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__), '..', '_tmp'
+            )
+        )
+        if not os.path.exists(tmppath):
+            os.mkdir(tmppath)
+
+        zippath = os.path.join(tmppath, 'results')
+        if not os.path.exists(zippath):
+            os.mkdir(zippath)
+
+        tspath = os.path.join(zippath, 'Ergebnisse_Zeitreihen.csv')
+        ss.energy_system.data_all.to_csv(tspath, sep=';')
+
+        cappath = os.path.join(zippath, 'Ergebnisse_Kapazitäten.csv')
+        ss.overview_caps.to_csv(cappath, sep=';', encoding='utf-8-sig')
+
+        kpdf = pd.DataFrame.from_dict(
+            {k: [v] for k, v in ss.energy_system.key_params.items()}
+        )
+        kprename = {
+            'op_cost_total': 'Betriebskosten',
+            'invest_total': 'Investitionskosten',
+            'cost_gas': 'Gaskosten',
+            'cost_el_grid': 'Elektrizitätskosten (Netz)',
+            'cost_el_internal': 'Elektrizitätskosten (Intern)',
+            'cost_el': 'Elektrizitätskosten (Gesamt)',
+            'cost_total': 'Gesamtkosten',
+            'revenues_spotmarket': 'Stromerlöse',
+            'revenues_heat': 'Wärmeerlöse',
+            'revenues_total': 'Gesamterlöse',
+            'balance_total': 'Gesamtbilanz',
+            'LCOH': 'Wärmegestehungskosten',
+            'total_heat_demand': 'Gesamtwärmebedarf',
+            'Emissions OM (Gas)': 'Emissionen (Gasbezug)',
+            'Emissions OM (Electricity)': 'Emissionen (Elektrizitätsbezug)',
+            'Emissions OM (Spotmarket)': 'Emissionsgutschriften (Elektrizitätseinspeisung)',
+            'Total Emissions OM': 'Gesamtemissionen'
+        }
+        kpdf.rename(columns=kprename, inplace=True)
+
+        kppath = os.path.join(zippath, 'Ergebnisse_Allgemein.csv')
+        kpdf.to_csv(kppath, sep=';', encoding='utf-8-sig', index=False)
+
+        shutil.make_archive(zippath, 'zip', zippath)
+
+    with open(f'{zippath}.zip', 'rb') as file:
+        btn = st.download_button(
+            label='Speichere deine Ergebnisse',
+            data=file,
+            file_name='Ergebnisse',
+            mime='application/zip'
+        )
+
+    shutil.rmtree(tmppath)
 
 # %% MARK: Parameters
 shortnames = {
@@ -124,15 +187,15 @@ with tab_ov:
                 f'{topopath+unit_cat}.png', use_column_width=True
                 )
 
-    overview_caps = ss.energy_system.data_caps.copy()
+    ss.overview_caps = ss.energy_system.data_caps.copy()
     if tes_used:
         drop_cols = []
-        for col in overview_caps.columns:
+        for col in ss.overview_caps.columns:
             if 'cap_in_tes' in col or 'cap_out_tes' in col:
                 drop_cols.append(col)
-        overview_caps.drop(columns=drop_cols, inplace=True)
+        ss.overview_caps.drop(columns=drop_cols, inplace=True)
     renamedict = {}
-    for col in overview_caps.columns:
+    for col in ss.overview_caps.columns:
         ucat = col.split('_')[-1].rstrip('0123456789')
         unr = col.split('_')[-1][len(ucat):]
         if 'tes' in col:
@@ -142,11 +205,11 @@ with tab_ov:
         else:
             renamedict[col] = f'{longnames[ucat]} {unr} (MW)'
 
-    overview_caps.rename(columns=renamedict, inplace=True)
-    overview_caps.rename(index={0: 'Kapazität'}, inplace=True)
-    overview_caps = overview_caps.apply(lambda x: round(x, 1))
+    ss.overview_caps.rename(columns=renamedict, inplace=True)
+    ss.overview_caps.rename(index={0: 'Kapazität'}, inplace=True)
+    ss.overview_caps = ss.overview_caps.apply(lambda x: round(x, 1))
 
-    col_cap2.dataframe(overview_caps.T, use_container_width=True)
+    col_cap2.dataframe(ss.overview_caps.T, use_container_width=True)
 
 
     col_sum.subheader('Wärmeproduktion')
@@ -227,8 +290,9 @@ with tab_ov:
         )
 
     with st.container(border=True):
-    # st.markdown('---')
-        reset_es = st.button(
+
+        col_left, col_right = st.columns([1, 1])
+        reset_es = col_left.button(
             label='📝 **Neues Energiesystem konfigurieren**',
             key='reset_button_results',
             use_container_width=True
@@ -249,6 +313,14 @@ with tab_ov:
                 if key not in exceptions:
                     ss.pop(key)
             st.switch_page('pages/00_Energiesystem.py')
+
+        save_results_btn = col_right.button(
+            label='👇 **Ergebnisse downloaden**',  # 📁📂📃📄💿💾📋📑
+            key='save_button_results',
+            use_container_width=True
+            )
+        if save_results_btn:
+            save_results()
 
 # %% MARK: Unit Commitment
 with tab_unit:

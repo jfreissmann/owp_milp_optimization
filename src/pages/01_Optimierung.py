@@ -9,9 +9,9 @@ from streamlit import session_state as ss
 from model import EnergySystem
 
 
-@st.experimental_dialog('Energiesystem lokal speichern')
+@st.dialog('Energiesystem lokal speichern')
 def download_energy_system():
-    """Temporarely save data and zip it, the let user download zip archive."""
+    """Temporarely save data and zip it, then let user download zip archive."""
     with st.spinner('Daten werden verarbeitet...'):
         tmppath = os.path.abspath(
             os.path.join(
