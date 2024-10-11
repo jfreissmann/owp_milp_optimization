@@ -316,8 +316,7 @@ with tab_ov:
             st.switch_page('pages/00_Energiesystem.py')
 
         save_results_btn = col_right.button(
-            label='👇 **Ergebnisse downloaden**',  # 📁📂📃📄💿💾📋📑
-            key='save_button_results',
+            label='💾 **Ergebnisse downloaden**',
             use_container_width=True
             )
         if save_results_btn:
@@ -331,7 +330,7 @@ with tab_unit:
 
     heatprod = pd.DataFrame()
     for col in ss.energy_system.data_all.columns:
-        if 'Q_' in col:
+        if 'Q_' in col and ss.energy_system.data_all[col].sum() > 0:
             this_unit = None
             for unit in ss.param_units.keys():
                 if unit in col:
@@ -596,4 +595,5 @@ with tab_pro:
         with open(logpath, 'r', encoding='utf-8') as file:
             solverlog = file.read()
 
+        st.text(solverlog)
         st.text(solverlog)
