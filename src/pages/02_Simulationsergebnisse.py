@@ -1,14 +1,15 @@
 import datetime as dt
 import json
 import os
-import shutil
 import re
+import shutil
 
 import altair as alt
 import numpy as np
 import pandas as pd
 import streamlit as st
 from streamlit import session_state as ss
+
 
 @st.dialog('Ergebnisse lokal speichern')
 def save_results():
@@ -374,6 +375,34 @@ with tab_unit:
 
     heatprod = heatprod.loc[dates[0]:dates[1], :]
 
+    agg_results = col_sel.toggle(
+            'Ergebnisse aggregieren', key='toggle_agg_results'
+        )
+    if agg_results:
+        agg_periods = {
+            'Stündlich': 'H',
+            'Täglich': 'd',
+            'Wöchentlich': 'w',
+            'Monatlich': 'm',
+            'Quartalsweise': 'Q'
+        }
+        agg_period_name = col_sel.selectbox(
+            'Aggregationszeitraum wählen:', options=list(agg_periods.keys())
+        )
+        agg_period = agg_periods[agg_period_name]
+
+        agg_method = col_sel.selectbox(
+            'Aggregationsmethode wählen:', options=['Mittelwert', 'Summe']
+        )
+    else:
+        agg_period_name = 'Stündlich'
+
+    if agg_results:
+        if agg_method == 'Mittelwert':
+            heatprod = heatprod.resample(agg_period).mean()
+        elif agg_method == 'Summe':
+            heatprod = heatprod.resample(agg_period).sum()
+
     heatprod_sorted = pd.DataFrame(
         np.sort(heatprod.values, axis=0)[::-1], columns=heatprod.columns
         )
@@ -385,10 +414,16 @@ with tab_unit:
         columns={'variable': 'Versorgungsanlage'}, inplace=True
         )
 
+    ylabel = (
+        f'{agg_period_name}e'
+        if agg_period_name[-1] != 'e'
+        else agg_period_name
+    )
+
     col_unit.altair_chart(
         alt.Chart(hprod_sorted_melt).mark_line().encode(
-            y=alt.Y('value', title='Stündliche Wärmeproduktion in MWh'),
-            x=alt.X('Stunde', title='Stunden'),
+            y=alt.Y('value', title=f'{ylabel} Wärmeproduktion in MWh'),
+            x=alt.X('Stunde', title='Anzahl'),
             color=alt.Color('Versorgungsanlage').scale(
                 domain=selection,
                 range=[colors[re.sub(r'\s\d', '', s)] for s in selection]
@@ -414,7 +449,7 @@ with tab_unit:
 
     col_unit.altair_chart(
         alt.Chart(hprod_melt).mark_line().encode(
-            y=alt.Y('value', title='Stündliche Wärmeproduktion in MWh'),
+            y=alt.Y('value', title=f'{ylabel} Wärmeproduktion in MWh'),
             x=alt.X('Date', title='Datum'),
             color=alt.Color('Versorgungsanlage').scale(
                 domain=selection,
