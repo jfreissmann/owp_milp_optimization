@@ -379,11 +379,11 @@ with tab_unit:
         )
     if agg_results:
         agg_periods = {
-            'Stündlich': 'H',
+            'Stündlich': 'h',
             'Täglich': 'd',
-            'Wöchentlich': 'w',
-            'Monatlich': 'm',
-            'Quartalsweise': 'Q'
+            'Wöchentlich': 'W',
+            'Monatlich': 'ME',
+            'Quartalsweise': 'QE'
         }
         agg_period_name = col_sel.selectbox(
             'Aggregationszeitraum wählen:', options=list(agg_periods.keys())
