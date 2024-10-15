@@ -55,6 +55,7 @@ shortnames = {
     'Solarthermie': 'sol',
     'Spitzenlastkessel': 'plb',
     'Elektrodenheizkessel': 'eb',
+    'Externe Wärmequelle': 'exhs',
     'Wärmespeicher': 'tes'
 }
 

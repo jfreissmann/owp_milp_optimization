@@ -81,7 +81,8 @@ class EnergySystem():
         self.es.add(self.comps['gas_source'], self.comps['elec_source'])
 
         for unit, unit_params in self.param_units.items():
-            if unit.rstrip('0123456789') == 'sol':
+            unit_cat = unit.rstrip('0123456789')
+            if unit_cat == 'sol':
                 self.comps[unit] = solph.components.Source(
                     label=unit,
                     outputs={
@@ -102,8 +103,25 @@ class EnergySystem():
 
                 self.es.add(self.comps[unit])
 
-    def generate_sinks(self):
+            if unit_cat == 'exhs':
+                if unit_params['fix']:
+                    fix = 1
+                else:
+                    fix = None
+                self.comps[unit] = solph.components.Source(
+                    label=unit,
+                    outputs={
+                        self.buses['hnw']: solph.flows.Flow(
+                            variable_costs=unit_params['op_cost_var'],
+                            nominal_value=unit_params['Q_N'],
+                            fix=fix
+                            )
+                        }
+                    )
 
+                self.es.add(self.comps[unit])
+
+    def generate_sinks(self):
         self.comps['heat_sink'] = solph.components.Sink(
             label='heat demand',
             inputs={
@@ -132,7 +150,6 @@ class EnergySystem():
         internal_el = False
         for unit in self.param_units.keys():
             unit_cat = unit.rstrip('0123456789')
-            unit_nr = unit[len(unit_cat):]
             if unit_cat in ['ccet', 'ice']:
                 self.comps[unit] = solph.components.Converter(
                     label=unit,
@@ -383,28 +400,39 @@ class EnergySystem():
     def calc_econ_params(self):
         for unit in self.param_units.keys():
             unit_cat = unit.rstrip('0123456789')
-            unit_E_N = self.data_caps.loc[0, f'cap_{unit}']
-            add_cost = 0
-
-            if unit_cat == 'plb':
-                add_cost = self.param_opt['energy_tax']
-                E_N_label = f'Q_{unit}'
-            elif unit_cat == 'eb':
-                E_N_label = f'Q_{unit}'
-            elif unit_cat == 'hp':
-                E_N_label = f'Q_out_{unit}'
-            elif unit_cat == 'tes':
-                E_N_label = f'Q_in_{unit}'
-            elif unit_cat in ['ccet', 'ice']:
-                E_N_label = f'P_{unit}'
-                unit_E_N = (
-                    unit_E_N / self.param_units[unit]['eta_th']
-                    * self.param_units[unit]['eta_el']
-                    )
-            self.cost_df = calc_cost(
-                unit, unit_E_N, self.param_units, self.data_all[E_N_label],
-                self.cost_df, add_var_cost=add_cost
+            if unit_cat == 'exhs':
+                self.cost_df.loc['invest', unit] = 0
+                self.cost_df.loc['op_cost_fix', unit] = 0
+                self.cost_df.loc['op_cost_var', unit] = (
+                    self.param_units[unit]['op_cost_var']
+                    * self.data_all[f'Q_{unit}'].sum()
                 )
+                self.data_caps.loc[0, f'cap_{unit}'] = (
+                    self.param_units[unit]['Q_N']
+                )
+            else:
+                unit_E_N = self.data_caps.loc[0, f'cap_{unit}']
+                add_cost = 0
+
+                if unit_cat == 'plb':
+                    add_cost = self.param_opt['energy_tax']
+                    E_N_label = f'Q_{unit}'
+                elif unit_cat == 'eb':
+                    E_N_label = f'Q_{unit}'
+                elif unit_cat == 'hp':
+                    E_N_label = f'Q_out_{unit}'
+                elif unit_cat == 'tes':
+                    E_N_label = f'Q_in_{unit}'
+                elif unit_cat in ['ccet', 'ice']:
+                    E_N_label = f'P_{unit}'
+                    unit_E_N = (
+                        unit_E_N / self.param_units[unit]['eta_th']
+                        * self.param_units[unit]['eta_el']
+                        )
+                self.cost_df = calc_cost(
+                    unit, unit_E_N, self.param_units, self.data_all[E_N_label],
+                    self.cost_df, add_var_cost=add_cost
+                    )
 
         # %% Primary energy and total cost calculation
         # total unit costs

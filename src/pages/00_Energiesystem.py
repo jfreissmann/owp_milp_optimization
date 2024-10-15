@@ -38,6 +38,7 @@ shortnames = {
     'Solarthermie': 'sol',
     'Spitzenlastkessel': 'plb',
     'Elektrodenheizkessel': 'eb',
+    'Externe Wärmequelle': 'exhs',
     'Wärmespeicher': 'tes'
 }
 longnames = {
@@ -47,6 +48,7 @@ longnames = {
     'sol': 'Solarthermie',
     'plb': 'Spitzenlastkessel',
     'eb': 'Elektrodenheizkessel',
+    'exhs': 'Externe Wärmequelle',
     'tes': 'Wärmespeicher'
 }
 
@@ -228,11 +230,11 @@ with tab2:
             col_tech.subheader('Technische Parameter')
             for uinput, uinfo in ss.unit_inputs['Technische Parameter'].items():
                 if uinput in unit_params:
-                    if uinput == 'balanced':
+                    if uinfo['type'] == 'bool':
                         unit_params[uinput] = col_tech.toggle(
                             uinfo['name'],
                             value=unit_params[uinput],
-                            key=f'toggle_balanced_tes{unit_nr}'
+                            key=f'toggle_{unit}_{uinput}'
                         )
                     else:
                         if uinfo['unit'] == '%':

@@ -14,6 +14,13 @@
             "type": "float",
             "unit": "MW"
         },
+        "Q_N": {
+            "name": "Installierte Leistung",
+            "min": 0.0,
+            "max": 1000.0,
+            "type": "float",
+            "unit": "MW"
+        },
         "A_max": {
             "name": "Maximal installierbare Kollektorfläche",
             "min": 0.0,
@@ -107,6 +114,11 @@
         },
         "balanced": {
             "name": "Ausgeglichener Speicher über Betrachtungsperiode",
+            "type": "bool",
+            "unit": ""
+        },
+        "fix": {
+            "name": "Wärme muss bezogen werden",
             "type": "bool",
             "unit": ""
         }

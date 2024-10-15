@@ -70,5 +70,10 @@
         "inv_spez": 150000.00,
         "cap_max": 353,
         "cap_min": 0
+    },
+    "exhs": {
+        "Q_N": 10.0,
+        "op_cost_var": 50.0,
+        "fix": false
     }
 }

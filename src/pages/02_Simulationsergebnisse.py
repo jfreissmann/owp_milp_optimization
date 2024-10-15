@@ -80,6 +80,7 @@ shortnames = {
     'Solarthermie': 'sol',
     'Spitzenlastkessel': 'plb',
     'Elektrodenheizkessel': 'eb',
+    'Externe Wärmequelle': 'exhs',
     'Wärmespeicher': 'tes'
 }
 longnames = {
@@ -89,6 +90,7 @@ longnames = {
     'sol': 'Solarthermie',
     'plb': 'Spitzenlastkessel',
     'eb': 'Elektrodenheizkessel',
+    'exhs': 'Externe Wärmequelle',
     'tes': 'Wärmespeicher'
 }
 
@@ -101,7 +103,8 @@ colors = {
     'Wärmespeicher Ein': 'slategrey',
     'Wärmespeicher Aus': 'dimgrey',
     'Wärmebedarf': '#31333f',
-    'Elektrodenheizkessel': '#EC6707'
+    'Elektrodenheizkessel': '#EC6707',
+    'Externe Wärmequelle': '#74ADC0'
 }
 
 # %% MARK: Sidebar
