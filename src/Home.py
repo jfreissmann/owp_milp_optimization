@@ -94,7 +94,6 @@ st.write(
     )
 
 _, col_partner, _ = st.columns([0.1 ,0.8, 0.1])
-# logo_partner = os.path.join(__file__, '..', 'img', 'Logos_Partner_transparent.png')
 logo_partner = os.path.join(__file__, '..', 'img', 'Logos_Partner.svg')
 col_partner.image(logo_partner, use_column_width=True)
 
