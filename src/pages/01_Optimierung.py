@@ -77,7 +77,7 @@ with st.sidebar:
 
     st.subheader('Assoziierte Projektpartner')
     logo_bo = os.path.join(
-        os.path.dirname(__file__), '..', 'img', 'Logo_Boben_Op_2.png'
+        os.path.dirname(__file__), '..', 'img', 'Logo_Boben_Op.svg'
         )
     st.image(logo_bo, use_column_width=True)
 
@@ -87,7 +87,7 @@ with st.sidebar:
     st.image(logo_gp, use_column_width=True)
 
     logo_sw = os.path.join(
-        os.path.dirname(__file__), '..', 'img', 'Logo_SW_Flensburg.png'
+        os.path.dirname(__file__), '..', 'img', 'Logo_SW_Flensburg.svg'
         )
     st.image(logo_sw, use_column_width=True)
 
