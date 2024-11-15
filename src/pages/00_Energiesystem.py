@@ -353,8 +353,20 @@ with tab3:
 
         scale_hl = col_sel.toggle('Daten skalieren')
         if scale_hl:
-            scale_method = col_sel.selectbox('Methode', ['Faktor', 'Erweitert'])
-            if scale_method == 'Faktor':
+            scale_method = col_sel.selectbox(
+                'Methode', ['Haushalte', 'Faktor', 'Erweitert']
+                )
+            if scale_method == 'Haushalte':
+                if dataset_name == 'Flensburg':
+                    base_households = 50000
+                elif dataset_name == 'Sonderburg':
+                    base_households = 13000
+                scale_households = col_sel.number_input(
+                    'Anzahl Haushalte', value=base_households,
+                    min_value=1, step=100
+                    )
+                heat_load[dataset_name] *= scale_households / base_households
+            elif scale_method == 'Faktor':
                 scale_factor = col_sel.number_input(
                     'Skalierungsfaktor', value=1.0, step=0.1, min_value=0.0
                     )
