@@ -351,39 +351,43 @@ with tab3:
                 ]
             heat_load = heat_load.loc[dates[0]:dates[1], :]
 
-        scale_hl = col_sel.toggle('Daten skalieren')
+        scale_hl = col_sel.toggle('Daten skalieren', key='scale_hl')
         if scale_hl:
-            scale_method = col_sel.selectbox(
-                'Methode', ['Haushalte', 'Faktor', 'Erweitert']
+            scale_method_hl = col_sel.selectbox(
+                'Methode', ['Haushalte', 'Faktor', 'Erweitert'],
+                key='scale_method_hl'
                 )
-            if scale_method == 'Haushalte':
+            if scale_method_hl == 'Haushalte':
                 if dataset_name == 'Flensburg':
                     base_households = 50000
                 elif dataset_name == 'Sonderburg':
                     base_households = 13000
-                scale_households = col_sel.number_input(
+                scale_households_hl = col_sel.number_input(
                     'Anzahl Haushalte', value=base_households,
-                    min_value=1, step=100
+                    min_value=1, step=100, key='scale_households_hl'
                     )
-                heat_load[dataset_name] *= scale_households / base_households
-            elif scale_method == 'Faktor':
-                scale_factor = col_sel.number_input(
-                    'Skalierungsfaktor', value=1.0, step=0.1, min_value=0.0
+                heat_load[dataset_name] *= scale_households_hl / base_households
+            elif scale_method_hl == 'Faktor':
+                scale_factor_hl = col_sel.number_input(
+                    'Skalierungsfaktor', value=1.0, step=0.1, min_value=0.0,
+                    key='scale_factor_hl'
                     )
-                heat_load[dataset_name] *= scale_factor
-            elif scale_method == 'Erweitert':
-                scale_amp = col_sel.number_input(
+                heat_load[dataset_name] *= scale_factor_hl
+            elif scale_method_hl == 'Erweitert':
+                scale_amp_hl = col_sel.number_input(
                     'Stauchungsfaktor', value=1.0, step=0.1, min_value=0.0,
-                    help='Staucht die Lastdaten um den Median.'
+                    help='Staucht die Lastdaten um den Median.',
+                    key='scale_amp_hl'
                     )
-                scale_off = col_sel.number_input(
+                scale_off_hl = col_sel.number_input(
                     'Offset', value=1.0, step=0.1,
-                    help='Verschiebt den Median der Lastdaten.'
+                    help='Verschiebt den Median der Lastdaten.',
+                    key='scale_off_hl'
                     )
                 heat_load_median = heat_load[dataset_name].median()
                 heat_load[dataset_name] = (
-                    (heat_load[dataset_name] - heat_load_median) * scale_amp
-                    + heat_load_median + scale_off
+                    (heat_load[dataset_name] - heat_load_median) * scale_amp_hl
+                    + heat_load_median + scale_off_hl
                     )
                 # negative_mask = heat_load[dataset_name] < 0
                 if (heat_load[dataset_name] < 0).values.any():
@@ -477,6 +481,32 @@ with tab4:
             ]
         el_prices = el_prices.loc[el_dates[0]:el_dates[1], :]
         el_em = el_em.loc[el_dates[0]:el_dates[1], :]
+
+    scale_el = col_elp.toggle('Daten skalieren', key='scale_el')
+    if scale_el:
+        scale_method_el = col_elp.selectbox(
+            'Methode', ['Faktor', 'Erweitert'], key='scale_method_el'
+            )
+        if scale_method_el == 'Faktor':
+            scale_factor_el = col_elp.number_input(
+                'Skalierungsfaktor', value=1.0, step=0.1, min_value=0.0,
+                key='scale_factor_el'
+                )
+            el_prices['el_spot_price'] *= scale_factor_el
+        elif scale_method_el == 'Erweitert':
+            scale_amp_el = col_elp.number_input(
+                'Stauchungsfaktor', value=1.0, step=0.1, min_value=0.0,
+                help='Staucht die Lastdaten um den Median.', key='scale_amp_el'
+                )
+            scale_off_el = col_elp.number_input(
+                'Offset', value=1.0, step=0.1,
+                help='Verschiebt den Median der Lastdaten.', key='scale_off_el'
+                )
+            el_prices_median = el_prices['el_spot_price'].median()
+            el_prices['el_spot_price'] = (
+                (el_prices['el_spot_price'] - el_prices_median) * scale_amp_el
+                + el_prices_median + scale_off_el
+                )
 
     if any(heat_load):
         nr_steps_hl = len(heat_load.index)
