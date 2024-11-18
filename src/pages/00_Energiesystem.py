@@ -496,11 +496,11 @@ with tab4:
         elif scale_method_el == 'Erweitert':
             scale_amp_el = col_elp.number_input(
                 'Stauchungsfaktor', value=1.0, step=0.1, min_value=0.0,
-                help='Staucht die Lastdaten um den Median.', key='scale_amp_el'
+                help='Staucht die Strompreise um den Median.', key='scale_amp_el'
                 )
             scale_off_el = col_elp.number_input(
                 'Offset', value=1.0, step=0.1,
-                help='Verschiebt den Median der Lastdaten.', key='scale_off_el'
+                help='Verschiebt den Median der Strompreise.', key='scale_off_el'
                 )
             el_prices_median = el_prices['el_spot_price'].median()
             el_prices['el_spot_price'] = (
@@ -600,6 +600,32 @@ with tab5:
             ]
         gas_prices = gas_prices.loc[gas_dates[0]:gas_dates[1], :]
         co2_prices = co2_prices.loc[gas_dates[0]:gas_dates[1], :]
+
+    scale_gas = col_gas.toggle('Daten skalieren', key='scale_gas')
+    if scale_gas:
+        scale_method_gas = col_gas.selectbox(
+            'Methode', ['Faktor', 'Erweitert'], key='scale_method_gas'
+            )
+        if scale_method_gas == 'Faktor':
+            scale_factor_gas = col_gas.number_input(
+                'Skalierungsfaktor', value=1.0, step=0.1, min_value=0.0,
+                key='scale_factor_gas'
+                )
+            gas_prices['gas_price'] *= scale_factor_gas
+        elif scale_method_gas == 'Erweitert':
+            scale_amp_gas = col_gas.number_input(
+                'Stauchungsfaktor', value=1.0, step=0.1, min_value=0.0,
+                help='Staucht die Gaspreise um den Median.', key='scale_amp_gas'
+                )
+            scale_off_gas = col_gas.number_input(
+                'Offset', value=1.0, step=0.1,
+                help='Verschiebt den Median der Gaspreise.', key='scale_off_gas'
+                )
+            gas_prices_median = gas_prices['gas_price'].median()
+            gas_prices['gas_price'] = (
+                (gas_prices['gas_price'] - gas_prices_median) * scale_amp_gas
+                + gas_prices_median + scale_off_gas
+                )
 
     if any(heat_load):
         nr_steps_hl = len(heat_load.index)
