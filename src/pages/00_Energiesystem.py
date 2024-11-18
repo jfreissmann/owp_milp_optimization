@@ -217,6 +217,9 @@ with tab1:
         own_es = True
 
 # %% MARK: Unit Parameters
+comb_opt_params = ['cap_max', 'cap_min', 'Q_max', 'Q_min', 'A_max', 'A_min']
+disp_opt_params = ['cap_N', 'Q_N', 'A_N']
+
 with tab2:
     st.header('Parametrisierung der Wärmeversorgungsanlagen')
 
@@ -228,8 +231,18 @@ with tab2:
             col_tech, col_econ = st.columns(2, gap='large')
 
             col_tech.subheader('Technische Parameter')
+            unit_params['invest_mode'] = col_tech.toggle(
+                'Kapazität optimieren',
+                value=unit_params['invest_mode'],
+                key=f'toggle_{unit}_invest_mode'
+            )
             for uinput, uinfo in ss.unit_inputs['Technische Parameter'].items():
                 if uinput in unit_params:
+                    if unit_params['invest_mode'] and uinput in disp_opt_params:
+                        continue
+                    if not unit_params['invest_mode'] and uinput in comb_opt_params:
+                        continue
+
                     if uinfo['type'] == 'bool':
                         unit_params[uinput] = col_tech.toggle(
                             uinfo['name'],

@@ -1,15 +1,18 @@
 {
     "hp": {
+        "cap_N": 353,
         "Q_rel_max": 1.0,
         "Q_rel_min": 0.3,
         "cop": 3.0,
         "op_cost_var": 1.20,
         "op_cost_fix": 4000.00,
         "inv_spez": 510000.00,
+        "invest_mode": false,
         "cap_max": 353,
         "cap_min": 0
     },
     "ccet": {
+        "cap_N": 353,
         "Q_rel_max": 1.0,
         "Q_rel_min": 0.15,
         "eta_th": 0.5,
@@ -17,20 +20,24 @@
         "op_cost_var": 4.40,
         "op_cost_fix": 29300.00,
         "inv_spez": 880000.00,
+        "invest_mode": false,
         "cap_max": 353,
         "cap_min": 0
     },
     "plb": {
+        "cap_N": 353,
         "Q_rel_max": 1.0,
         "Q_rel_min": 0.15,
         "eta": 0.95,
         "op_cost_var": 1.10,
         "op_cost_fix": 1950.00,
         "inv_spez": 60000.00,
+        "invest_mode": false,
         "cap_max": 353,
         "cap_min": 0
     },
     "ice": {
+        "cap_N": 353,
         "Q_rel_max": 1.0,
         "Q_rel_min": 0.15,
         "eta_th": 0.45,
@@ -38,19 +45,24 @@
         "op_cost_var": 7.50,
         "op_cost_fix": 9750.00,
         "inv_spez": 950000.00,
+        "invest_mode": false,
         "cap_max": 353,
         "cap_min": 0
     },
     "sol": {
+        "A_N": 50000,
         "eta_col": 0.3,
         "op_cost_var": 0.22,
         "op_cost_fix": 0.04,
         "inv_spez": 199,
+        "invest_mode": false,
         "A_max": 150000,
         "A_min": 0
     },
     "tes": {
+        "Q_N": 5000,
         "inv_spez": 580,
+        "invest_mode": false,
         "Q_max": 8472,
         "Q_min": 0,
         "Q_in_to_cap": 0.041666667,
@@ -62,17 +74,22 @@
         "init_storage": 0
     },
     "eb": {
+        "cap_N": 353,
         "Q_rel_max": 1.0,
         "Q_rel_min": 0.15,
         "eta": 0.95,
         "op_cost_var": 0.90,
         "op_cost_fix": 1070.00,
         "inv_spez": 150000.00,
+        "invest_mode": false,
         "cap_max": 353,
         "cap_min": 0
     },
     "exhs": {
-        "Q_N": 10.0,
+        "invest_mode": false,
+        "cap_max": 353,
+        "cap_min": 0,
+        "cap_N": 10.0,
         "op_cost_var": 50.0,
         "fix": false
     }

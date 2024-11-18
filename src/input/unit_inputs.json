@@ -14,7 +14,7 @@
             "type": "float",
             "unit": "MW"
         },
-        "Q_N": {
+        "cap_N": {
             "name": "Installierte Leistung",
             "min": 0.0,
             "max": 1000.0,
@@ -35,6 +35,13 @@
             "type": "float",
             "unit": "m²"
         },
+        "A_N": {
+            "name": "Installierte Kollektorfläche",
+            "min": 0.0,
+            "max": 1000000.0,
+            "type": "float",
+            "unit": "m²"
+        },
         "Q_max": {
             "name": "Maximal installierbare Speicherkapazität",
             "min": 0.0,
@@ -44,6 +51,13 @@
         },
         "Q_min": {
             "name": "Minimal installierbare Speicherkapazität",
+            "min": 0.0,
+            "max": 1000000.0,
+            "type": "float",
+            "unit": "MWh"
+        },
+        "Q_N": {
+            "name": "Installierte Speicherkapazität",
             "min": 0.0,
             "max": 1000000.0,
             "type": "float",
