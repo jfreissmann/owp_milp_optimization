@@ -82,20 +82,23 @@ class EnergySystem():
 
         for unit, unit_params in self.param_units.items():
             unit_cat = unit.rstrip('0123456789')
+
             if unit_cat == 'sol':
+                if unit_params['invest_mode']:
+                    nominal_value = solph.Investment(
+                        ep_costs=unit_params['inv_spez'] / self.bwsf,
+                        maximum=unit_params['A_max'],
+                        minimum=unit_params['A_min']
+                        )
+                else:
+                    nominal_value = unit_params['cap_N']
+
                 self.comps[unit] = solph.components.Source(
                     label=unit,
                     outputs={
                         self.buses['hnw']: solph.flows.Flow(
                             variable_costs=unit_params['op_cost_var'],
-                            nominal_value=solph.Investment(
-                                ep_costs=(
-                                    unit_params['inv_spez']
-                                    / self.bwsf
-                                    ),
-                                maximum=unit_params['A_max'],
-                                minimum=unit_params['A_min']
-                                ),
+                            nominal_value=nominal_value,
                             fix=self.data['solar_heat_flow']
                             )
                         }
@@ -108,12 +111,22 @@ class EnergySystem():
                     fix = 1
                 else:
                     fix = None
+
+                if unit_params['invest_mode']:
+                    nominal_value = solph.Investment(
+                        ep_costs=unit_params['inv_spez'] / self.bwsf,
+                        maximum=unit_params['cap_max'],
+                        minimum=unit_params['cap_min']
+                        )
+                else:
+                    nominal_value = unit_params['cap_N']
+
                 self.comps[unit] = solph.components.Source(
                     label=unit,
                     outputs={
                         self.buses['hnw']: solph.flows.Flow(
                             variable_costs=unit_params['op_cost_var'],
-                            nominal_value=unit_params['Q_N'],
+                            nominal_value=nominal_value,
                             fix=fix
                             )
                         }
@@ -148,33 +161,36 @@ class EnergySystem():
 
     def generate_components(self):
         internal_el = False
-        for unit in self.param_units.keys():
+        for unit, unit_params in self.param_units.items():
             unit_cat = unit.rstrip('0123456789')
             if unit_cat in ['ccet', 'ice']:
+
+                if unit_params['invest_mode']:
+                    nominal_value = solph.Investment(
+                        ep_costs=unit_params['inv_spez'] / self.bwsf,
+                        maximum=unit_params['cap_max'],
+                        minimum=unit_params['cap_min']
+                        )
+                else:
+                    nominal_value = unit_params['cap_N']
+
                 self.comps[unit] = solph.components.Converter(
                     label=unit,
                     inputs={self.buses['gnw']: solph.flows.Flow()},
                     outputs={
                         self.buses['chp_node']: solph.flows.Flow(
-                            variable_costs=self.param_units[unit]['op_cost_var']
+                            variable_costs=unit_params['op_cost_var']
                             ),
                         self.buses['hnw']: solph.flows.Flow(
-                            investment=solph.Investment(
-                                ep_costs=(
-                                    self.param_units[unit]['inv_spez']
-                                    / self.bwsf
-                                    ),
-                                maximum=self.param_units[unit]['cap_max'],
-                                minimum=self.param_units[unit]['cap_min']
-                                ),
-                            max=self.param_units[unit]['Q_rel_max'],
-                            min=self.param_units[unit]['Q_rel_min'],
+                            nominal_value=nominal_value,
+                            max=unit_params['Q_rel_max'],
+                            min=unit_params['Q_rel_min'],
                             nonconvex=solph.NonConvex()
                             )
                         },
                     conversion_factors={
-                        self.buses['chp_node']: self.param_units[unit]['eta_el'],
-                        self.buses['hnw']: self.param_units[unit]['eta_th']
+                        self.buses['chp_node']: unit_params['eta_el'],
+                        self.buses['hnw']: unit_params['eta_th']
                         }
                     )
 
@@ -186,79 +202,84 @@ class EnergySystem():
                     eff = 'cop'
                     input_nw = 'enw'
                     var_cost = (
-                        self.param_units[unit]['op_cost_var']
+                        unit_params['op_cost_var']
                         + self.param_opt['elec_consumer_charges_self']
                         )
                 elif unit_cat == 'plb':
                     eff = 'eta'
                     input_nw = 'gnw'
                     var_cost = (
-                        self.param_units[unit]['op_cost_var']
+                        unit_params['op_cost_var']
                         + self.param_opt['energy_tax']
                         )
                 elif unit_cat == 'eb':
                     eff = 'eta'
                     input_nw = 'enw'
                     var_cost = (
-                        self.param_units[unit]['op_cost_var']
+                        unit_params['op_cost_var']
                         + self.param_opt['elec_consumer_charges_self']
                         )
+
+                if unit_params['invest_mode']:
+                    nominal_value = solph.Investment(
+                        ep_costs=unit_params['inv_spez'] / self.bwsf,
+                        maximum=unit_params['cap_max'],
+                        minimum=unit_params['cap_min']
+                        )
+                else:
+                    nominal_value = unit_params['cap_N']
 
                 self.comps[unit] = solph.components.Converter(
                     label=unit,
                     inputs={self.buses[input_nw]: solph.flows.Flow()},
                     outputs={
                         self.buses['hnw']: solph.flows.Flow(
-                            investment=solph.Investment(
-                                ep_costs=(
-                                    self.param_units[unit]['inv_spez']
-                                    / self.bwsf
-                                    ),
-                                maximum=self.param_units[unit]['cap_max'],
-                                minimum=self.param_units[unit]['cap_min']
-                                ),
-                            max=self.param_units[unit]['Q_rel_max'],
-                            min=self.param_units[unit]['Q_rel_min'],
+                            nominal_value=nominal_value,
+                            max=unit_params['Q_rel_max'],
+                            min=unit_params['Q_rel_min'],
                             nonconvex=solph.NonConvex(),
                             variable_costs=var_cost
                             )
                         },
                     conversion_factors={
-                        self.buses[input_nw]: self.param_units[unit][eff]
+                        self.buses[input_nw]: unit_params[eff]
                         }
                     )
 
                 self.es.add(self.comps[unit])
 
             if unit_cat == 'tes':
+                if unit_params['invest_mode']:
+                    nominal_storage_capacity = solph.Investment(
+                        ep_costs=unit_params['inv_spez'] / self.bwsf,
+                        maximum=unit_params['Q_max'],
+                        minimum=unit_params['Q_min']
+                        )
+                else:
+                    nominal_storage_capacity = unit_params['Q_N']
+
                 self.comps[unit] = solph.components.GenericStorage(
                     label=unit,
-                    investment=solph.Investment(
-                        ep_costs=(
-                            self.param_units[unit]['inv_spez'] / self.bwsf
-                            ),
-                        maximum=self.param_units[unit]['Q_max'],
-                        minimum=self.param_units[unit]['Q_min']
-                        ),
+                    nominal_storage_capacity=nominal_storage_capacity,
                     inputs={
                         self.buses['hnw']: solph.flows.Flow(
-                            variable_costs=self.param_units[unit]['op_cost_var']
+                            variable_costs=unit_params['op_cost_var']
                             )
                         },
                     outputs={
                         self.buses['hnw']: solph.flows.Flow(
-                            variable_costs=self.param_units[unit]['op_cost_var']
+                            variable_costs=unit_params['op_cost_var']
                             )
                         },
                     invest_relation_input_capacity=(
-                        self.param_units[unit]['Q_in_to_cap']
+                        unit_params['Q_in_to_cap']
                         ),
                     invest_relation_output_capacity=(
-                        self.param_units[unit]['Q_out_to_cap']
+                        unit_params['Q_out_to_cap']
                         ),
-                    initial_storage_level=self.param_units[unit]['init_storage'],
-                    loss_rate=self.param_units[unit]['Q_rel_loss'],
-                    balanced=self.param_units[unit]['balanced']
+                    initial_storage_level=unit_params['init_storage'],
+                    loss_rate=unit_params['Q_rel_loss'],
+                    balanced=unit_params['balanced']
                     )
 
                 self.es.add(self.comps[unit])
@@ -328,16 +349,26 @@ class EnergySystem():
         if self.chp_used:
             data_chpnode = views.node(self.results, 'chp node')['sequences']
 
-        self.data_caps = views.node(self.results, 'heat network')['scalars']
+        try:
+            self.data_caps = (
+                views.node(self.results, 'heat network')['scalars']
+                )
+        except KeyError:
+            self.data_caps = pd.Series()
 
         if self.tes_used:
             data_tes = None
-            for unit in self.param_units.keys():
+            for unit, unit_params in self.param_units.items():
                 if unit.rstrip('0123456789') == 'tes':
                     next_data_tes = views.node(self.results, unit)['sequences']
-                    next_cap_tes = views.node(self.results, unit)['scalars'][
-                        ((unit, 'None'), 'invest')
-                        ]
+                    if unit_params['invest_mode']:
+                        next_cap_tes = (
+                            views.node(
+                                self.results, unit
+                                )['scalars'][((unit, 'None'), 'invest')]
+                            )
+                    else:
+                        next_cap_tes = unit_params['Q_N']
                     if data_tes is None:
                         data_tes = next_data_tes
                     else:
@@ -364,6 +395,17 @@ class EnergySystem():
             ].copy()
 
         result_labeling(self.data_caps)
+
+        for unit, unit_params in self.param_units.items():
+            if f'cap_{unit}' not in self.data_caps.index:
+                unit_cat = unit.rstrip('0123456789')
+                if unit_cat == 'tes':
+                    param_var = 'Q_N'
+                elif unit_cat == 'sol':
+                    param_var = 'A_N'
+                else:
+                    param_var = 'cap_N'
+                self.data_caps[f'cap_{unit}'] = unit_params[param_var]
 
         for col in self.data_all.columns:
             if ('status' in col[-1]) or ('state' in col):
@@ -398,41 +440,31 @@ class EnergySystem():
         self.key_params = {}
 
     def calc_econ_params(self):
-        for unit in self.param_units.keys():
+        for unit, unit_params in self.param_units.items():
             unit_cat = unit.rstrip('0123456789')
-            if unit_cat == 'exhs':
-                self.cost_df.loc['invest', unit] = 0
-                self.cost_df.loc['op_cost_fix', unit] = 0
-                self.cost_df.loc['op_cost_var', unit] = (
-                    self.param_units[unit]['op_cost_var']
-                    * self.data_all[f'Q_{unit}'].sum()
-                )
-                self.data_caps.loc[0, f'cap_{unit}'] = (
-                    self.param_units[unit]['Q_N']
-                )
-            else:
-                unit_E_N = self.data_caps.loc[0, f'cap_{unit}']
-                add_cost = 0
 
-                if unit_cat == 'plb':
-                    add_cost = self.param_opt['energy_tax']
-                    E_N_label = f'Q_{unit}'
-                elif unit_cat == 'eb':
-                    E_N_label = f'Q_{unit}'
-                elif unit_cat == 'hp':
-                    E_N_label = f'Q_out_{unit}'
-                elif unit_cat == 'tes':
-                    E_N_label = f'Q_in_{unit}'
-                elif unit_cat in ['ccet', 'ice']:
-                    E_N_label = f'P_{unit}'
-                    unit_E_N = (
-                        unit_E_N / self.param_units[unit]['eta_th']
-                        * self.param_units[unit]['eta_el']
-                        )
-                self.cost_df = calc_cost(
-                    unit, unit_E_N, self.param_units, self.data_all[E_N_label],
-                    self.cost_df, add_var_cost=add_cost
+            unit_E_N = self.data_caps.loc[0, f'cap_{unit}']
+            add_cost = 0
+
+            if unit_cat == 'plb':
+                add_cost = self.param_opt['energy_tax']
+                E_N_label = f'Q_{unit}'
+            elif unit_cat in ['eb', 'exhs']:
+                E_N_label = f'Q_{unit}'
+            elif unit_cat == 'hp':
+                E_N_label = f'Q_out_{unit}'
+            elif unit_cat == 'tes':
+                E_N_label = f'Q_in_{unit}'
+            elif unit_cat in ['ccet', 'ice']:
+                E_N_label = f'P_{unit}'
+                unit_E_N = (
+                    unit_E_N / unit_params['eta_th']
+                    * unit_params['eta_el']
                     )
+            self.cost_df = calc_cost(
+                unit, unit_E_N, self.param_units, self.data_all[E_N_label],
+                self.cost_df, add_var_cost=add_cost
+                )
 
         # %% Primary energy and total cost calculation
         # total unit costs

@@ -90,7 +90,9 @@
         "cap_max": 353,
         "cap_min": 0,
         "cap_N": 10.0,
+        "inv_spez": 0.00,
         "op_cost_var": 50.0,
+        "op_cost_fix": 0.00,
         "fix": false
     }
 }
