@@ -114,12 +114,12 @@ with st.sidebar:
     logo_inno = os.path.join(
         os.path.dirname(__file__), '..', 'img', 'Logo_InnoNord_OWP.png'
         )
-    st.image(logo_inno, use_column_width=True)
+    st.image(logo_inno, use_container_width=True)
 
     logo = os.path.join(
         os.path.dirname(__file__), '..', 'img', 'Logo_ZNES_mitUnisV2.svg'
         )
-    st.image(logo, use_column_width=True)
+    st.image(logo, use_container_width=True)
 
     st.markdown("""---""")
 
@@ -127,17 +127,17 @@ with st.sidebar:
     logo_bo = os.path.join(
         os.path.dirname(__file__), '..', 'img', 'Logo_Boben_Op.svg'
         )
-    st.image(logo_bo, use_column_width=True)
+    st.image(logo_bo, use_container_width=True)
 
     logo_gp = os.path.join(
         os.path.dirname(__file__), '..', 'img', 'Logo_GP_Joule.png'
         )
-    st.image(logo_gp, use_column_width=True)
+    st.image(logo_gp, use_container_width=True)
 
     logo_sw = os.path.join(
         os.path.dirname(__file__), '..', 'img', 'Logo_SW_Flensburg.svg'
         )
-    st.image(logo_sw, use_column_width=True)
+    st.image(logo_sw, use_container_width=True)
 
 # %% MARK: Main Window
 tes_used = any(
@@ -181,14 +181,14 @@ with tab_ov:
     topopath = os.path.abspath(
         os.path.join(os.path.dirname(__file__), '..', 'img', 'es_topology_')
         )
-    col_cap1.image(f'{topopath}header.png', use_column_width=True)
+    col_cap1.image(f'{topopath}header.png', use_container_width=True)
 
     for unit in ss.param_units.keys():
         if ss.energy_system.data_caps.loc[0, f'cap_{unit}'] > 0:
             unit_cat = unit.rstrip('0123456789')
 
             col_cap1.image(
-                f'{topopath+unit_cat}.png', use_column_width=True
+                f'{topopath+unit_cat}.png', use_container_width=True
                 )
 
     ss.overview_caps = ss.energy_system.data_caps.copy()

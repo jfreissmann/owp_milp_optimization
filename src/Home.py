@@ -7,7 +7,7 @@ from streamlit import session_state as ss
 st.set_page_config(
     layout='wide',
     page_title='OWP MILP Optimierung',
-    page_icon=os.path.join(__file__, '..', 'img', 'page_icon_ZNES.png')
+    page_icon=os.path.join(os.path.dirname(__file__), 'img',  'page_icon_ZNES.png')
     )
 
 @st.cache_data
@@ -43,20 +43,20 @@ with st.sidebar:
     logo_inno = os.path.join(
         os.path.dirname(__file__), 'img', 'Logo_InnoNord_OWP.png'
         )
-    st.image(logo_inno, use_column_width=True)
+    st.image(logo_inno, use_container_width=True)
 
     logo = os.path.join(
         os.path.dirname(__file__), 'img', 'Logo_ZNES_mitUnisV2.svg'
         )
-    st.image(logo, use_column_width=True)
+    st.image(logo, use_container_width=True)
 
 # %% Main Window
 col_inno, _, col_foerder = st.columns([0.3, 0.4, 0.3])
-logo = os.path.join(__file__, '..', 'img', 'Logo_InnoNord_OWP.png')
-col_inno.image(logo, use_column_width=True)
+logo = os.path.join(os.path.dirname(__file__), 'img',  'Logo_InnoNord_OWP.png')
+col_inno.image(logo, use_container_width=True)
 
-logo_foederer = os.path.join(__file__, '..', 'img', 'Logos_Förderer_ohnePTJ.png')
-col_foerder.image(logo_foederer, use_column_width=True)
+logo_foederer = os.path.join(os.path.dirname(__file__), 'img',  'Logos_Förderer_ohnePTJ.png')
+col_foerder.image(logo_foederer, use_container_width=True)
 
 st.write(
     """
@@ -94,8 +94,8 @@ st.write(
     )
 
 _, col_partner, _ = st.columns([0.1 ,0.8, 0.1])
-logo_partner = os.path.join(__file__, '..', 'img', 'Logos_Partner.svg')
-col_partner.image(logo_partner, use_column_width=True)
+logo_partner = os.path.join(os.path.dirname(__file__), 'img',  'Logos_Partner.svg')
+col_partner.image(logo_partner, use_container_width=True)
 
 st.markdown('''---''')
 

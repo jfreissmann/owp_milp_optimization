@@ -92,12 +92,12 @@ with st.sidebar:
     logo_inno = os.path.join(
         os.path.dirname(__file__), '..', 'img', 'Logo_InnoNord_OWP.png'
         )
-    st.image(logo_inno, use_column_width=True)
+    st.image(logo_inno, use_container_width=True)
 
     logo = os.path.join(
         os.path.dirname(__file__), '..', 'img', 'Logo_ZNES_mitUnisV2.svg'
         )
-    st.image(logo, use_column_width=True)
+    st.image(logo, use_container_width=True)
 
     st.markdown('''---''')
 
@@ -105,17 +105,17 @@ with st.sidebar:
     logo_bo = os.path.join(
         os.path.dirname(__file__), '..', 'img', 'Logo_Boben_Op.svg'
         )
-    st.image(logo_bo, use_column_width=True)
+    st.image(logo_bo, use_container_width=True)
 
     logo_gp = os.path.join(
         os.path.dirname(__file__), '..', 'img', 'Logo_GP_Joule.png'
         )
-    st.image(logo_gp, use_column_width=True)
+    st.image(logo_gp, use_container_width=True)
 
     logo_sw = os.path.join(
         os.path.dirname(__file__), '..', 'img', 'Logo_SW_Flensburg.svg'
         )
-    st.image(logo_sw, use_column_width=True)
+    st.image(logo_sw, use_container_width=True)
 
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
     ['System', 'Anlagen', 'Wärme', 'Elektrizität', 'Gas', 'Sonstiges']
@@ -152,7 +152,7 @@ with tab1:
     topopath = os.path.abspath(
         os.path.join(os.path.dirname(__file__), '..', 'img', 'es_topology_')
         )
-    col_vis_unit.image(f'{topopath}header.png', use_column_width=True)
+    col_vis_unit.image(f'{topopath}header.png', use_container_width=True)
     if 'nr_units' not in ss:
         ss.nr_units = {}
     if ss.units:
@@ -161,7 +161,7 @@ with tab1:
                 [0.8, 0.2], vertical_alignment='center'
             )
             col_vis_unit.image(
-                f'{topopath+shortnames[unit]}.png', use_column_width=True
+                f'{topopath+shortnames[unit]}.png', use_container_width=True
                 )
 
             if unit in ss.nr_units:
