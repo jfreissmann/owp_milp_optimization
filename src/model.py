@@ -449,8 +449,6 @@ class EnergySystem():
             if unit_cat == 'plb':
                 add_cost = self.param_opt['energy_tax']
                 E_N_label = f'Q_{unit}'
-            elif unit_cat in ['eb', 'exhs']:
-                E_N_label = f'Q_{unit}'
             elif unit_cat == 'hp':
                 E_N_label = f'Q_out_{unit}'
             elif unit_cat == 'tes':
@@ -461,6 +459,9 @@ class EnergySystem():
                     unit_E_N / unit_params['eta_th']
                     * unit_params['eta_el']
                     )
+            else:
+                E_N_label = f'Q_{unit}'
+
             self.cost_df = calc_cost(
                 unit, unit_E_N, self.param_units, self.data_all[E_N_label],
                 self.cost_df, add_var_cost=add_cost
