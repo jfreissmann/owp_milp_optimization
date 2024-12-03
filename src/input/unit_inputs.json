@@ -150,14 +150,14 @@
             "min": -100.0,
             "max": 100.0,
             "type": "float",
-            "unit": "€/MW"
+            "unit": "€/MWh"
         },
         "op_cost_fix": {
             "name": "Jährliche fixe Betriebskosten",
             "min": 0.0,
             "max": 100000.0,
             "type": "float",
-            "unit": "€/MWh"
+            "unit": "€/MW"
         }
     }
 }
