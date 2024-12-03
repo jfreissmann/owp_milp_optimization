@@ -277,19 +277,19 @@ with tab_ov:
     st.subheader('Ökologische Kennzahlen')
     met1, met2, met3, met4= st.columns([1, 1, 1, 1])
     met1.metric(
-        'Gesamtemissionen in T',
+        'Gesamtemissionen in t',
         round(ss.energy_system.key_params['Total Emissions OM']/1e3, 1)
         )
     met2.metric(
-        'Emissionen durch Gasbezug in T',
+        'Emissionen durch Gasbezug in t',
         round(ss.energy_system.key_params['Emissions OM (Gas)']/1e3, 1)
         )
     met3.metric(
-        'Emissionen durch Strombezug in T',
+        'Emissionen durch Strombezug in t',
         round(ss.energy_system.key_params['Emissions OM (Electricity)']/1e3, 1)
         )
     met4.metric(
-        'Emissionsgutschriften durch Stromproduktion in T',
+        'Emissionsgutschriften durch Stromproduktion in t',
         round(ss.energy_system.key_params['Emissions OM (Spotmarket)']/1e3, 1)
         )
 
