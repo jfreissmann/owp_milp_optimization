@@ -178,7 +178,8 @@ with tab1:
         for u, params in ss.param_units_all.items():
             if longnames[u] in ss.units:
                 for i in range(1, ss.nr_units[longnames[u]]+1):
-                    ss.param_units[f'{u}{i}'] = deepcopy(params)
+                    if f'{u}{i}' not in ss.param_units.keys():
+                        ss.param_units[f'{u}{i}'] = deepcopy(params)
 
     st.header('Eigenes Wärmeversorgungssystem laden')
 
