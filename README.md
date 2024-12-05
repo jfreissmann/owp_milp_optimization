@@ -17,7 +17,7 @@ Developed as part of the project "Offene Wärmespeicherplanung (OWP)" as part of
 
 ## Installation
 
-For now, only direct download from the [GitHub Repository](https://github.com/jfreissmann/owp_milp_optimization) is supported, so just clone it locally or download a ZIP file of the code. To use the optimization dashboard, the necessary dependencies have to be installed from the `requirements.txt` file. In a clean environment from the root directory the installation from this file could look like this:
+For now, only direct download from the [GitHub Repository](https://github.com/jfreissmann/owp_milp_optimization) is supported, so just clone it locally or download a ZIP file of the code. If you are using [Miniforge](https://github.com/conda-forge/miniforge) or another environment management tool using [conda](https://docs.conda.io/en/latest/), you can create and activate a clean environment like this:
 
 ```
 conda create -n my_new_env python=3.11
@@ -26,6 +26,8 @@ conda create -n my_new_env python=3.11
 ```
 conda activate my_new_env
 ```
+
+To use the optimization dashboard, the necessary dependencies have to be installed from the `requirements.txt` file. In a clean environment from the root directory the installation from this file could look like this:
 
 ```
 python -m pip install -r requirements.txt
