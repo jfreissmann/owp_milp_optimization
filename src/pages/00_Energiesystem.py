@@ -175,11 +175,31 @@ with tab1:
                 label_visibility='collapsed'
             )
 
+        removed_units = [u for u in ss.nr_units.keys() if u not in ss.units]
+        for unit_cat in removed_units:
+            ss.nr_units.pop(unit_cat, None)
+            to_delete = [
+                u for u in ss.param_units
+                if longnames[u.rstrip('0123456789')] == unit_cat
+                ]
+            for key in to_delete:
+                ss.param_units.pop(key, None)
+
         for u, params in ss.param_units_all.items():
             if longnames[u] in ss.units:
                 for i in range(1, ss.nr_units[longnames[u]]+1):
                     if f'{u}{i}' not in ss.param_units.keys():
                         ss.param_units[f'{u}{i}'] = deepcopy(params)
+
+        for unit_cat in ss.units:
+            current_count = ss.nr_units[unit_cat]
+            to_delete = [
+                u for u in ss.param_units
+                if longnames[u.rstrip('0123456789')] == unit_cat
+                and int(u[len(u.rstrip('0123456789')):]) > current_count
+                ]
+            for key in to_delete:
+                ss.param_units.pop(key, None)
 
     st.header('Eigenes Wärmeversorgungssystem laden')
 
