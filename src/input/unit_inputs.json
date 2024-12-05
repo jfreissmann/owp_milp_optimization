@@ -96,14 +96,16 @@
             "min": 1.0,
             "max": 10.0,
             "type": "float",
-            "unit": ""
+            "unit": "",
+            "tooltip": "Leistungszahl"
         },
         "Q_rel_loss": {
             "name": "Relativer Oberflächenwärmeverlust",
             "min": 0.0,
             "max": 100.0,
             "type": "float",
-            "unit": "%"
+            "unit": "%",
+            "tooltip": "Wärmeverlust pro Zeitschritt in Relation zum aktuellen Speicherfüllstand."
         },
         "Q_in_to_cap": {
             "name": "Verhältnis von Beladeleistung zur Speicherkapazität",
@@ -124,12 +126,14 @@
             "min": 0.0,
             "max": 100.0,
             "type": "float",
-            "unit": "%"
+            "unit": "%",
+            "tooltip": "Startspeicherfüllstand. Relativer Speicherfüllstand im ersten Zeitschritt."
         },
         "balanced": {
             "name": "Ausgeglichener Speicher über Betrachtungsperiode",
             "type": "bool",
-            "unit": ""
+            "unit": "",
+            "tooltip": "Wenn dies aktiviert wird, muss die Einsatzoptimierung dafür sorgen, dass der Speicher im letzten Zeitschritt den gleichen Füllstand aufweist, wie im ersten."
         },
         "fix": {
             "name": "Wärme muss bezogen werden",

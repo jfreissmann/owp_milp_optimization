@@ -268,7 +268,8 @@ with tab2:
                         unit_params[uinput] = col_tech.toggle(
                             uinfo['name'],
                             value=unit_params[uinput],
-                            key=f'toggle_{unit}_{uinput}'
+                            key=f'toggle_{unit}_{uinput}',
+                            help=uinfo.get('tooltip', None)
                         )
                     else:
                         if uinfo['unit'] == '%':
@@ -286,7 +287,8 @@ with tab2:
                                 min_value=uinfo['min'],
                                 max_value=uinfo['max'],
                                 step=(uinfo['max']-uinfo['min'])/100,
-                                key=f'input_{unit}_{uinput}'
+                                key=f'input_{unit}_{uinput}',
+                                help=uinfo.get('tooltip', None)
                                 )
                             )
                         if uinfo['unit'] == '%':
