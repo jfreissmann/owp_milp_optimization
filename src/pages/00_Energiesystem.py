@@ -297,9 +297,14 @@ with tab2:
             col_econ.subheader('Ökonomische Parameter')
             for uinput, uinfo in ss.unit_inputs['Ökonomische Parameter'].items():
                 if uinput in unit_params:
-                    if unit == 'Solarthermie':
-                        label = f"{uinfo['name']} in €/m²"
-                    elif unit == 'Wärmespeicher':
+                    if unit_cat == 'sol':
+                        if uinput == 'inv_spez':
+                            label = f"{uinfo['name']} in €/m²"
+                        elif uinput == 'op_cost_fix':
+                            label = f"{uinfo['name']} in €/MWh"
+                        else:
+                            label = f"{uinfo['name']} in {uinfo['unit']}"
+                    elif unit_cat == 'tes':
                         label = f"{uinfo['name']} in €/MWh"
                     else:
                         label = f"{uinfo['name']} in {uinfo['unit']}"
