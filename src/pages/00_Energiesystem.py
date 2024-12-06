@@ -308,6 +308,27 @@ with tab2:
                         label = f"{uinfo['name']} in €/MWh"
                     else:
                         label = f"{uinfo['name']} in {uinfo['unit']}"
+
+                    tooltip = uinfo.get('tooltip', None)
+                    if unit_cat == 'sol' and uinput == 'op_cost_var':
+                        if tooltip is None:
+                            tooltip = (
+                                'Die variablen Betriebskosten von '
+                                + 'Solarthermie  werden in der '
+                                + 'zugrundeliegenden Quelle anhand der '
+                                + 'insgesamt produzierten Wärmemenge '
+                                + 'berechnet.'
+                                )
+                        else:
+                            tooltip += (
+                                '\nDie variablen Betriebskosten von '
+                                + 'Solarthermie  werden in der '
+                                + 'zugrundeliegenden Quelle anhand der '
+                                + 'insgesamt produzierten Wärmemenge '
+                                + 'berechnet.'
+                                )
+
+
                     unit_params[uinput] = (
                         col_econ.number_input(
                             label,
@@ -317,7 +338,8 @@ with tab2:
                             min_value=uinfo['min'],
                             max_value=uinfo['max'],
                             step=(uinfo['max']-uinfo['min'])/100,
-                            key=f'input_{unit}_{uinput}'
+                            key=f'input_{unit}_{uinput}',
+                            help=tooltip
                             )
                         )
 
