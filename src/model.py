@@ -91,7 +91,7 @@ class EnergySystem():
                         minimum=unit_params['A_min']
                         )
                 else:
-                    nominal_value = unit_params['cap_N']
+                    nominal_value = unit_params['A_N']
 
                 self.comps[unit] = solph.components.Source(
                     label=unit,
