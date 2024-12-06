@@ -444,22 +444,38 @@ with tab_unit:
     heatprod.index.names = ['Date']
     heatprod.reset_index(inplace=True)
 
+    if agg_results and 'Wärmebedarf' in selection:
+        selection.remove('Wärmebedarf')
+
     hprod_melt = heatprod[['Date'] + selection].melt('Date')
     hprod_melt.rename(
         columns={'variable': 'Versorgungsanlage'}, inplace=True
         )
 
-    col_unit.altair_chart(
-        alt.Chart(hprod_melt).mark_line().encode(
-            y=alt.Y('value', title=f'{ylabel} Wärmeproduktion in MWh'),
-            x=alt.X('Date', title='Datum'),
-            color=alt.Color('Versorgungsanlage').scale(
-                domain=selection,
-                range=[colors[re.sub(r'\s\d', '', s)] for s in selection]
-                )
-            ),
-        use_container_width=True
-        )
+    if not agg_results:
+        col_unit.altair_chart(
+            alt.Chart(hprod_melt).mark_line().encode(
+                y=alt.Y('value', title=f'{ylabel} Wärmeproduktion in MWh'),
+                x=alt.X('Date', title='Datum'),
+                color=alt.Color('Versorgungsanlage').scale(
+                    domain=selection,
+                    range=[colors[re.sub(r'\s\d', '', s)] for s in selection]
+                    )
+                ),
+            use_container_width=True
+            )
+    else:
+        col_unit.altair_chart(
+            alt.Chart(hprod_melt).mark_bar().encode(
+                y=alt.Y('value', title=f'{ylabel} Wärmeproduktion in MWh'),
+                x=alt.X('Date', title='Datum'),
+                color=alt.Color('Versorgungsanlage').scale(
+                    domain=selection,
+                    range=[colors[re.sub(r'\s\d', '', s)] for s in selection]
+                    )
+                ),
+            use_container_width=True
+            )
 
 # %% MARK: Electricity Production
 if chp_used:
